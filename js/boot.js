@@ -3,6 +3,7 @@
 /* ---------- data ---------- */
 async function boot(){
   route();
+  setTimeout(function(){if(!ST.ready){ST.ready=true;route()}},6000);
   var cl=window.claude;
   if((!cl||!cl.use)&&window.SB_CFG&&window.supabase&&window.supabase.createClient){
     SB=window.supabase.createClient(window.SB_CFG.url,window.SB_CFG.key);ST.db=sbMakeDb(SB);ST.write=true}

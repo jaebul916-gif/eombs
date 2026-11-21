@@ -7,6 +7,7 @@ function render(){
   else if(r.indexOf('item-')===0)h=pageItem(r.slice(5));else if(r==='services')h=pageServices();else if(r==='cart')h=pageCart();else if(r==='mypage')h=pageMy();else if(r==='notices')h=pageNotices();else if(r==='manage')h=pageAdmin();else if(r==='login')h=pageLogin();else if(r==='terms'||r==='privacy'||r==='refund')h=pageLegal(r);else h=pageHome();
   app.innerHTML=h;renderModal();
   document.querySelectorAll('.links a').forEach(function(a){if(a.dataset.r===(r.indexOf('item-')===0?'services':r))a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  document.getElementById('myLink').hidden=!ST.acct;
   var al=document.getElementById('adminLink');al.hidden=!ST.admin;var pc=ST.admin?allOrdersFlat().filter(function(o){return o.status==='pending'}).length:0;al.textContent=pc?'관리자 ('+pc+')':'관리자';
   document.getElementById('cartCount').textContent=ST.cart.reduce(function(s,c){return s+c.qty},0);
   document.getElementById('acctSlot').innerHTML=ST.acct?'<a href="#mypage" class="who">'+esc(ST.acct.name)+'님</a> <button class="linkbtn" data-act="logout">로그아웃</button>':'<a href="#login">로그인</a>';
@@ -17,10 +18,11 @@ function render(){
 }
 function refresh(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&app.contains(a)){ST.pending=true;return}render()}
 app.addEventListener('focusout',function(){if(!ST.pending)return;setTimeout(function(){var a=document.activeElement;if(!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&app.contains(a))){ST.pending=false;render()}},0)});
+function hasSessionHint(){try{if(localStorage.getItem('sp-sess'))return true;for(var i=0;i<localStorage.length;i++){if(/^sb-.*-auth-token$/.test(localStorage.key(i)))return true}}catch(e){}return false}
 function route(){var h=(location.hash||'').replace('#','');if(['home','services','cart','mypage','notices','manage','login','terms','privacy','refund'].indexOf(h)<0&&!/^item-[A-Za-z0-9_-]+$/.test(h))h='home';
   if(h!==ST.route){ST.paywin=null;ST.modal=null;ST.dtab='info';ST.gi=0}
   if(ST.sel&&ST.sel.editLid&&h!=='item-'+ST.sel.pid)ST.sel=null;
-  if(ST.ready&&!ST.acct&&(h==='cart'||h==='mypage'||h==='manage')){ST.next='#'+h;ST.loginMsg='로그인 후 이용할 수 있습니다.';ST.ltab='in';location.hash='#login';return}
+  if((ST.ready||!hasSessionHint())&&!ST.acct&&(h==='cart'||h==='mypage'||h==='manage')){ST.next='#'+h;ST.loginMsg='로그인 후 이용할 수 있습니다.';ST.ltab='in';location.hash='#login';return}
   ST.route=h;ST.err='';ST.lerr='';render();window.scrollTo(0,0)}
 window.addEventListener('hashchange',route);
 
