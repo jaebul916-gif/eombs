@@ -1,4 +1,4 @@
--- 셀러포트 Supabase 스키마 v2 (테이블 분리 + 권한 규칙 + 서버 함수)
+-- 엄배송 Supabase 스키마 v2 (테이블 분리 + 권한 규칙 + 서버 함수)
 -- SQL Editor 에 전체를 붙여 넣고 Run 하세요. 여러 번 실행해도 안전합니다.
 -- 주의: 예전 단일 테이블(docs)은 회원 정보를 profiles 로 옮긴 뒤 삭제됩니다.
 
@@ -487,7 +487,7 @@ begin
 
   v_oid := 'o' || substr(md5(random()::text || clock_timestamp()::text), 1, 12);
   loop
-    v_no := 'SP' || to_char(now() at time zone 'Asia/Seoul', 'YYYYMMDD') || '-' || lpad((1000 + floor(random() * 9000))::integer::text, 4, '0');
+    v_no := 'EB' || to_char(now() at time zone 'Asia/Seoul', 'YYYYMMDD') || '-' || lpad((1000 + floor(random() * 9000))::integer::text, 4, '0');
     exit when not exists (select 1 from public.orders where no = v_no);
   end loop;
   insert into public.orders (id, no, user_id, pay, depositor, contact_name, contact_phone, contact_addr, total, points_used, status, paid_at)

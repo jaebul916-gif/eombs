@@ -16,12 +16,12 @@ function pageHome(){
   var opts=ps.filter(function(p){return !p.soldout}).map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===ST.calc.pid?' selected':'')+'>'+esc(p.name)+'</option>'}).join('');
   var feat=ps.filter(function(p){return !p.soldout}).sort(function(a,b){return (b.best?1:0)-(a.best?1:0)||(a.order||0)-(b.order||0)}).slice(0,4);
   var ns=(ST.notices||[]).slice(0,3).map(function(n){return '<li class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-block:.8rem"><a href="#notices">'+esc(n.title)+'</a><span class="num small muted">'+esc((n.at||'').slice(0,10))+'</span></li>'}).join('');
-  return '<section class="hero"><h1 class="big">셀러포트. <span>배송등록,<br>이렇게 간단하게.</span></h1>'
+  return '<section class="hero"><h1 class="big">엄배송. <span>배송등록,<br>이렇게 간단하게.</span></h1>'
    +'<p class="lead">쇼피와 큐텐 주문번호만 적어 보내세요. 배송등록과 합배송 접수'+(low?'는 건당 '+won(low)+'부터':'')+' 시작합니다.</p>'
    +'<div class="row"><a class="btn" href="#services" data-auth="1">배송등록 신청하기</a><a class="btn ghost" href="#mypage" data-auth="1">주문 조회</a></div></section>'
    +'<section class="showcase"><div class="eyebrow">라벨 한 장까지</div><h2>접수부터 송장 라벨까지,<br>한곳에서.</h2>'
    +'<div class="label" role="img" aria-label="송장 라벨 예시"><div class="label-top"><span>SAMPLE</span><span>100×100</span></div>'
-   +'<div class="label-route">ICN → SGP</div><div class="small muted">SP20261121-4821</div><div class="barcode"></div>'
+   +'<div class="label-route">ICN → SGP</div><div class="small muted">EB20261121-4821</div><div class="barcode"></div>'
    +'<dl><dt>PCS</dt><dd>1</dd><dt>WEIGHT</dt><dd>480 g</dd><dt>MARKET</dt><dd>SHOPEE SG</dd></dl><div class="label-foot">예시 라벨 · 실제 송장이 아닙니다</div></div></section>'
    +'<section><div class="sechead"><h2>인기 서비스.</h2><a class="lnk" href="#services">전체 보기</a></div><div class="tiles">'+feat.map(tile).join('')+'</div></section>'
    +'<section><div class="card calc"><h2 style="font-size:1.6rem;font-weight:600;letter-spacing:-.025em">요금 계산.</h2><p class="muted small">서비스와 수량을 고르면 합계가 바로 나옵니다.</p>'

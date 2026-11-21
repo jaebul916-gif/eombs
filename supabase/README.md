@@ -1,4 +1,4 @@
-# 셀러포트 Supabase 설정 (테이블 분리 버전)
+# 엄배송 Supabase 설정 (테이블 분리 버전)
 
 1. Supabase > Authentication > Sign In / Providers > Email 에서 "Confirm email" 을 끕니다.
 2. SQL Editor 에 `setup.sql` 전체를 붙여 넣고 Run 합니다. 여러 번 실행해도 됩니다.

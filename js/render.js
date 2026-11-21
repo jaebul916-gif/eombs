@@ -14,7 +14,7 @@ function render(){
   document.getElementById('bannerSlot').innerHTML=s.banner?'<div class="banner">'+esc(s.banner)+'</div>':'';
   var biz=[];if(s.bizName)biz.push('상호 '+s.bizName);if(s.ceo)biz.push('대표 '+s.ceo);if(s.bizNo)biz.push('사업자등록번호 '+s.bizNo);if(s.mailOrder)biz.push('통신판매업 '+s.mailOrder);
   var biz2=[];if(s.bizAddr)biz2.push(s.bizAddr);if(s.tel)biz2.push(s.tel);if(s.hours)biz2.push(s.hours);
-  document.getElementById('foot').innerHTML='<span>쇼피·큐텐 셀러를 위한 배송대행 서비스입니다.</span><span><a href="#terms">이용약관</a> · <a href="#privacy">개인정보 처리방침</a> · <a href="#refund">환불 규정</a></span>'+(biz.length||biz2.length?'<hr>':'')+(biz.length?'<span>'+esc(biz.join(' · '))+'</span>':'')+(biz2.length?'<span>'+esc(biz2.join(' · '))+'</span>':'')+'<hr><span>Copyright © 2026 셀러포트. All rights reserved.</span>';
+  document.getElementById('foot').innerHTML='<span>쇼피·큐텐 셀러를 위한 배송대행 서비스입니다.</span><span><a href="#terms">이용약관</a> · <a href="#privacy">개인정보 처리방침</a> · <a href="#refund">환불 규정</a></span>'+(biz.length||biz2.length?'<hr>':'')+(biz.length?'<span>'+esc(biz.join(' · '))+'</span>':'')+(biz2.length?'<span>'+esc(biz2.join(' · '))+'</span>':'')+'<hr><span>Copyright © 2026 엄배송. All rights reserved.</span>';
 }
 function refresh(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&app.contains(a)){ST.pending=true;return}render()}
 app.addEventListener('focusout',function(){if(!ST.pending)return;setTimeout(function(){var a=document.activeElement;if(!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&app.contains(a))){ST.pending=false;render()}},0)});

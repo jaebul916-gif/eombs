@@ -42,7 +42,7 @@ async function placeOrder(){
   f.pay=pts>=total?'points':'bank';
   if(f.pay==='bank'&&(f.method||'bank')!=='bank'){ST.paywin={method:f.method,step:1,amount:total-pts,names:lines.map(function(l){return l.p.name}).join(', ')};render();return}
   var now=new Date().toISOString();
-  var order={id:'o'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),no:'SP'+ymd()+'-'+Math.floor(1000+Math.random()*9000),createdAt:now,pay:f.pay,depositor:f.pay==='bank'?(f.dep.trim()||f.name.trim()):'',
+  var order={id:'o'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),no:'EB'+ymd()+'-'+Math.floor(1000+Math.random()*9000),createdAt:now,pay:f.pay,depositor:f.pay==='bank'?(f.dep.trim()||f.name.trim()):'',
     contact:{name:f.name.trim(),phone:f.phone.trim(),addr:f.addr.trim()},items:items,total:total,pts:pts};
   ST.busy=true;render();
   try{

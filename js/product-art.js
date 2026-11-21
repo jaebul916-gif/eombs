@@ -20,13 +20,13 @@ function artIcon(k,ink){
   return '<g '+o+'><rect x="90" y="50" width="300" height="300" rx="14"/><path d="M130 110 H350 M130 170 H300 M130 230 H350 M130 290 H260"/></g>';
 }
 function artSvg(pid){
-  var a=ART[pid]||{bg:['#eceef3','#d4d8e2'],ink:'#2b2f3a',title:['셀러포트',''],sub:'',icon:'label'};
+  var a=ART[pid]||{bg:['#eceef3','#d4d8e2'],ink:'#2b2f3a',title:['엄배송',''],sub:'',icon:'label'};
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+a.bg[0]+'"/><stop offset="1" stop-color="'+a.bg[1]+'"/></linearGradient></defs>'
    +'<rect width="600" height="600" fill="url(#g)"/>'
    +'<g transform="translate(60 40)">'+artIcon(a.icon,a.ink)+'</g>'
    +'<g font-family="Noto Sans KR,Apple SD Gothic Neo,Malgun Gothic,sans-serif" fill="'+a.ink+'" font-weight="800">'
    +'<text x="48" y="430" font-size="64">'+a.title[0]+'</text><text x="48" y="500" font-size="64">'+a.title[1]+'</text>'
    +'<text x="48" y="545" font-size="24" font-weight="500" opacity=".8">'+a.sub+'</text>'
-   +'<text x="552" y="570" font-size="16" font-weight="700" text-anchor="end" opacity=".55" letter-spacing="2">SELLERPORT</text></g></svg>';
+   +'<text x="552" y="570" font-size="16" font-weight="700" text-anchor="end" opacity=".55" letter-spacing="2">EOMBAESONG</text></g></svg>';
 }
 function artUrl(id){return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(artSvg(String(id).replace(/^img-/,'')))}
