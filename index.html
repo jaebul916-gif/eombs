@@ -240,7 +240,7 @@ var DEFAULTS=[
 var ST={db:null,write:null,acct:null,admin:false,products:null,notices:null,settings:{},
   myDoc:null,myFulfil:null,myWallet:null,allOrders:null,allFulfil:{},allWallet:{},accounts:null,
   cart:[],form:{pay:'bank',name:'',phone:'',dep:'',addr:'',agree:false,pts:0},route:'home',err:'',cat:'all',sort:'pop',
-  calc:{pid:'',qty:1},atab:'orders',afilter:'all',busy:false,pending:false,ltab:'in',lerr:'',ready:false,next:'',pendingAdd:null,loginMsg:'',inq:null,replies:{},adminInq:null,ofilter:'all',sel:null,gi:0,ierr:'',dtab:'info',only:'',modal:null,reviews:[],pqa:[],qrep:{},pedit:'',pdraft:null,pnew:false,pdelc:'',upmsg:'',presetQty:0,likes:[]};
+  calc:{pid:'',qty:1},atab:'orders',afilter:'all',busy:false,pending:false,ltab:'in',lerr:'',ready:false,next:'',pendingAdd:null,loginMsg:'',inq:null,replies:{},adminInq:null,ofilter:'all',sel:null,gi:0,ierr:'',dtab:'info',only:'',modal:null,reviews:[],pqa:[],qrep:{},pedit:'',pdraft:null,pnew:false,pdelc:'',upmsg:'',presetQty:0,likes:[],paywin:null};
 var subs=[];
 try{var c=JSON.parse(localStorage.getItem('sp-cart')||'[]');if(Array.isArray(c))ST.cart=c.filter(function(x){return x&&x.pid}).map(function(x){return x.lid?x:{lid:newLid(),pid:x.pid,qty:x.qty||1,opts:{},inputs:x.note?{f1:x.note}:{}}})}catch(e){}
 function saveCart(){try{localStorage.setItem('sp-cart',JSON.stringify(ST.cart))}catch(e){}}
@@ -346,7 +346,7 @@ function pageHome(){
   var ns=(ST.notices||[]).slice(0,3).map(function(n){return '<li class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-block:.8rem"><a href="#notices">'+esc(n.title)+'</a><span class="num small muted">'+esc((n.at||'').slice(0,10))+'</span></li>'}).join('');
   return '<section class="hero"><h1 class="big">셀러포트. <span>배송등록,<br>이렇게 간단하게.</span></h1>'
    +'<p class="lead">쇼피와 큐텐 주문번호만 적어 보내세요. 배송등록과 합배송 접수'+(low?'는 건당 '+won(low)+'부터':'')+' 시작합니다.</p>'
-   +'<div class="row"><a class="btn" href="#services">배송등록 신청하기</a><a class="btn ghost" href="#mypage">주문 조회</a></div></section>'
+   +'<div class="row"><a class="btn" href="#services" data-auth="1">배송등록 신청하기</a><a class="btn ghost" href="#mypage" data-auth="1">주문 조회</a></div></section>'
    +'<section class="showcase"><div class="eyebrow">라벨 한 장까지</div><h2>접수부터 송장 라벨까지,<br>한곳에서.</h2>'
    +'<div class="label" role="img" aria-label="송장 라벨 예시"><div class="label-top"><span>SAMPLE</span><span>100×100</span></div>'
    +'<div class="label-route">ICN → SGP</div><div class="small muted">SP20261121-4821</div><div class="barcode"></div>'
@@ -476,8 +476,21 @@ function pageItem(pid){
    +(ST.ierr?'<p class="err" role="alert">'+esc(ST.ierr)+'</p>':'')+'<div class="row">'+btns+likeBtn+'</div></div></div></div>'
    +th+'<div class="detail">'+content+'</div>';
 }
+var PW_LABEL={card:'신용카드',vbank:'가상계좌',rt:'실시간계좌이체',spay:'삼성페이'};
+function payHtml(){
+  var w=ST.paywin;var opt=function(a){return a.map(function(x){return '<option>'+x+'</option>'}).join('')};
+  var head='<div class="row" style="justify-content:space-between"><strong style="font-size:1.1rem">결제창</strong><span class="chip warn">테스트</span></div><div class="small muted">'+esc(w.names)+'</div><div class="totalbar"><span class="muted">'+esc(PW_LABEL[w.method]||'')+' 결제금액</span><b class="num">'+won(w.amount)+'</b></div>';
+  if(w.step===2)return '<div class="mback"></div><div class="mbox" role="dialog" aria-modal="true" aria-label="결제창">'+head+'<p style="text-align:center;padding:1.2rem 0" class="muted">결제 승인을 요청하는 중입니다...</p></div>';
+  if(w.step===3)return '<div class="mback"></div><div class="mbox" role="dialog" aria-modal="true" aria-label="결제창">'+head+'<p style="font-weight:600">결제가 진행되지 않았습니다.</p><p class="small muted">테스트 결제창입니다. 결제대행사(PG)가 연결되지 않아 실제 결제와 주문 접수는 이루어지지 않았습니다. 카드번호 등은 입력받지 않았습니다.</p><div class="row"><button class="btn" data-act="pw-bank">무통장입금으로 결제</button><button class="btn ghost" data-act="pw-close">닫기</button></div></div>';
+  var body=w.method==='card'?'<label>카드사<select>'+opt(['삼성카드','현대카드','KB국민카드','신한카드','롯데카드','하나카드','우리카드','NH농협카드','BC카드'])+'</select></label><label>할부<select>'+opt(['일시불','2개월','3개월','6개월','12개월'])+'</select></label>'
+   :w.method==='rt'?'<label>은행 선택<select>'+opt(['국민은행','신한은행','우리은행','하나은행','농협은행','기업은행','카카오뱅크','토스뱅크'])+'</select></label>'
+   :w.method==='vbank'?'<label>입금 은행<select>'+opt(['국민은행','신한은행','우리은행','하나은행','농협은행'])+'</select></label><label>현금영수증<select>'+opt(['발급 안 함','소득공제','지출증빙'])+'</select></label>'
+   :'<p class="muted small">삼성페이 앱에서 결제를 승인하는 화면입니다.</p>';
+  return '<div class="mback" data-act="pw-close"></div><div class="mbox" role="dialog" aria-modal="true" aria-label="결제창">'+head+'<div class="form" style="margin:0">'+body+'</div><div class="row"><button class="btn" data-act="pw-next">결제 진행</button><button class="btn ghost" data-act="pw-close">취소</button></div></div>';
+}
 function renderModal(){
   var el=document.getElementById('modalSlot');if(!el)return;var m=ST.modal;
+  if(ST.paywin){el.innerHTML=payHtml();return}
   if(!m){el.innerHTML='';return}
   var msg=m.kind==='buy'?'장바구니에 다른 상품이 있습니다. 함께 주문할까요?':'선택하신 상품을 장바구니에 담았습니다.';
   var btns=m.kind==='buy'?'<button class="btn" data-act="m-cart">함께 주문</button><button class="btn ghost" data-act="m-only">이 상품만 구매</button>':'<button class="btn" data-act="m-cart">장바구니</button><button class="btn ghost" data-act="m-close">계속 쇼핑</button>';
@@ -671,7 +684,7 @@ function render(){
 function refresh(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&app.contains(a)){ST.pending=true;return}render()}
 app.addEventListener('focusout',function(){if(!ST.pending)return;setTimeout(function(){var a=document.activeElement;if(!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&app.contains(a))){ST.pending=false;render()}},0)});
 function route(){var h=(location.hash||'').replace('#','');if(['home','services','cart','mypage','notices','manage','login','terms','privacy','refund'].indexOf(h)<0&&!/^item-[A-Za-z0-9_-]+$/.test(h))h='home';
-  if(h!==ST.route){ST.modal=null;ST.dtab='info';ST.gi=0}
+  if(h!==ST.route){ST.paywin=null;ST.modal=null;ST.dtab='info';ST.gi=0}
   if(ST.sel&&ST.sel.editLid&&h!=='item-'+ST.sel.pid)ST.sel=null;
   if(ST.ready&&!ST.acct&&(h==='cart'||h==='mypage'||h==='manage')){ST.next='#'+h;ST.loginMsg='로그인 후 이용할 수 있습니다.';ST.ltab='in';location.hash='#login';return}
   ST.route=h;ST.err='';ST.lerr='';render();window.scrollTo(0,0)}
@@ -790,7 +803,7 @@ async function placeOrder(){
   var total=items.reduce(function(s,i){return s+i.price*i.qty},0);
   var bal0=(ST.myWallet&&ST.myWallet.balance)||0;var us0=bal0>=PTS_MIN?Math.min(bal0,total):0;var pts=Math.max(0,Math.min(us0,Math.floor(Number(f.pts)||0)));
   f.pay=pts>=total?'points':'bank';
-  if(f.pay==='bank'&&(f.method||'bank')!=='bank'){ST.err='선택하신 결제수단은 아직 연결되지 않았습니다. 무통장입금 또는 포인트로 결제해 주세요.';return render()}
+  if(f.pay==='bank'&&(f.method||'bank')!=='bank'){ST.paywin={method:f.method,step:1,amount:total-pts,names:lines.map(function(l){return l.p.name}).join(', ')};render();return}
   var now=new Date().toISOString();
   var order={id:'o'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),no:'SP'+ymd()+'-'+Math.floor(1000+Math.random()*9000),createdAt:now,pay:f.pay,depositor:f.pay==='bank'?(f.dep.trim()||f.name.trim()):'',
     contact:{name:f.name.trim(),phone:f.phone.trim(),addr:f.addr.trim()},items:items,total:total,pts:pts};
@@ -806,6 +819,8 @@ async function placeOrder(){
 function csvCell(v){var s=String(v==null?'':v);return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
 
 /* ---------- events ---------- */
+document.addEventListener('click',function(e){var a=e.target.closest('a[data-auth]');if(!a||ST.acct)return;e.preventDefault();
+  ST.next=a.getAttribute('href');ST.pendingAdd=null;ST.loginMsg='로그인 후 이용할 수 있습니다.';ST.ltab='in';location.hash='#login';if(ST.route==='login')render()});
 document.addEventListener('click',async function(e){
   var t=e.target.closest('[data-act]');if(!t)return;var a=t.dataset.act;var id=t.dataset.id;
   try{
@@ -882,6 +897,9 @@ document.addEventListener('click',async function(e){
   else if(a==='m-cart'){ST.modal=null;ST.only='';location.hash='#cart'}
   else if(a==='m-only'){ST.only=ST.modal?ST.modal.lid:'';ST.modal=null;location.hash='#cart'}
   else if(a==='m-close'){ST.modal=null;render()}
+  else if(a==='pw-next'){ST.paywin.step=2;render();setTimeout(function(){if(ST.paywin){ST.paywin.step=3;render()}},1400)}
+  else if(a==='pw-close'){ST.paywin=null;render()}
+  else if(a==='pw-bank'){ST.paywin=null;ST.form.method='bank';render()}
   else if(a==='only-off'){ST.only='';render()}
   else if(a==='line-edit'){var c0=ST.cart.find(function(c){return c.lid===id});if(c0){ST.sel={pid:c0.pid,qty:c0.qty,opts:Object.assign({},c0.opts),inputs:Object.assign({},c0.inputs),editLid:id};ST.gi=0;location.hash='#item-'+c0.pid}}
   else if(a==='rv-add'){if(!ST.acct||!ST.db)return;var rt0=document.getElementById('rvText').value.trim();if(!rt0){toast('내용을 입력해 주세요');return}
