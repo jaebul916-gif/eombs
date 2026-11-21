@@ -201,6 +201,8 @@ details .body{margin-top:.6rem;white-space:pre-wrap;color:var(--muted)}
 <div class="toast" id="toast" hidden></div>
 <div id="modalSlot"></div>
 
+<script>window.SB_CFG={url:'https://cgvhekywavsfzurgtnqn.supabase.co',key:'sb_publishable_oXE78mym3EOSzItfMh2xDA_Ph7xBkeM'};</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 (function(){
 "use strict";
@@ -258,6 +260,41 @@ async function hashPw(id,pw){var b=new TextEncoder().encode(id+':'+pw);var h=awa
 var ID_RE=/^[a-z0-9_-]{4,20}$/;
 
 /* ---------- pages ---------- */
+/* ---------- Supabase (GitHub Pages 등 Claude 저장소가 없을 때) ---------- */
+var SB=null;
+function blobUrl(id){if(SB){try{return SB.storage.from('uploads').getPublicUrl(id).data.publicUrl}catch(e){}}return '/_blob/'+id}
+function sbRnd(n){var a=new Uint8Array(n);crypto.getRandomValues(a);return Array.from(a).map(function(x){return x.toString(16).padStart(2,'0')}).join('')}
+function sbDeep(a,b){if(b===null||typeof b!=='object'||Array.isArray(b))return b;var o=Object.assign({},(a&&typeof a==='object'&&!Array.isArray(a))?a:{});Object.keys(b).forEach(function(k){o[k]=sbDeep(o[k],b[k])});return o}
+function sbMakeDb(sb){
+  var T='docs',nrt=0;
+  function mk(r){return {id:r.id,exists:true,data:function(){return JSON.parse(JSON.stringify(r.data))}}}
+  function snap(r){return r?mk(r):{exists:false,id:null,data:function(){return undefined}}}
+  function watch(coll,load,er){
+    var alive=true,tm=null;
+    function run(){if(!alive)return;load().catch(function(e){if(er)er(e)})}
+    function soon(){clearTimeout(tm);tm=setTimeout(run,250)}
+    run();
+    var ch=null;try{ch=sb.channel('rt-'+coll+'-'+(++nrt)).on('postgres_changes',{event:'*',schema:'public',table:T,filter:'coll=eq.'+coll},soon).subscribe()}catch(e){}
+    var iv=setInterval(run,60000);
+    return function(){alive=false;clearTimeout(tm);clearInterval(iv);if(ch){try{sb.removeChannel(ch)}catch(e){}}}
+  }
+  function col(coll,filters){return {
+    where:function(f,op,v){if(op!=='==')throw new Error('unsupported');return col(coll,(filters||[]).concat([[f,v]]))},
+    onSnapshot:function(cb,er){return watch(coll,async function(){var q=sb.from(T).select('id,data').eq('coll',coll);(filters||[]).forEach(function(x){q=q.eq('data->>'+x[0],x[1])});var r=await q;if(r.error)throw r.error;cb({docs:(r.data||[]).map(mk)})},er)},
+    add:async function(d){var r=await sb.from(T).insert({coll:coll,id:sbRnd(8),data:d});if(r.error)throw r.error}}}
+  function doc(path){var i=path.indexOf('/'),coll=path.slice(0,i),id=path.slice(i+1);
+    async function get(){var r=await sb.from(T).select('id,data').eq('coll',coll).eq('id',id).maybeSingle();if(r.error)throw r.error;return snap(r.data)}
+    return {get:get,
+      set:async function(d){var r=await sb.from(T).upsert({coll:coll,id:id,data:d},{onConflict:'coll,id'});if(r.error)throw r.error},
+      update:async function(d){var s=await get();if(!s.exists){var e=new Error('missing');e.code='invalid_argument';throw e}var r=await sb.from(T).update({data:sbDeep(s.data(),d)}).eq('coll',coll).eq('id',id);if(r.error)throw r.error},
+      delete:async function(){var r=await sb.from(T).delete().eq('coll',coll).eq('id',id);if(r.error)throw r.error},
+      onSnapshot:function(cb,er){return watch(coll,async function(){cb(await get())},er)}}}
+  return {doc:doc,collection:function(c){return col(c,[])}};
+}
+var sbAssetsObj={upload:async function(file){var id='u'+sbRnd(12);var r=await SB.storage.from('uploads').upload(id,file,{contentType:file.type||'application/octet-stream'});if(r.error)throw r.error;return {id:id}}};
+function getAssets(){if(SB)return Promise.resolve(sbAssetsObj);return (window.claude&&window.claude.use)?window.claude.use('assets'):Promise.resolve(null)}
+function sbEmail(id){return id+'@sellerport.app'}
+
 function legacyFields(p){
   if(p.type==='register')return [{id:'f1',label:'마켓 주문번호',type:'lines',required:true,matchQty:true,placeholder:'한 줄에 하나씩 입력',help:'수량과 같은 개수를 입력해 주세요.'}];
   if(p.type==='domestic')return [{id:'f1',label:'택배 정보',type:'textarea',required:true,placeholder:'',help:'보내는 곳, 받는 곳, 물품'}];
@@ -291,7 +328,7 @@ function validateSel(p,sel,stage){
 function itemDetail(i){
   var h='';
   if(i.optsText&&i.optsText.length)h+='<div class="small muted">'+esc(i.optsText.join(' · '))+'</div>';
-  if(i.details&&i.details.length)h+=i.details.map(function(d){return '<div class="small"><span class="muted">'+esc(d.k)+'</span>'+(d.file?'<div><a href="/_blob/'+bid(d.file)+'" target="_blank" rel="noopener">첨부 파일 보기</a></div>':'<pre>'+esc(d.v)+'</pre>')+'</div>'}).join('');
+  if(i.details&&i.details.length)h+=i.details.map(function(d){return '<div class="small"><span class="muted">'+esc(d.k)+'</span>'+(d.file?'<div><a href="'+blobUrl(bid(d.file))+'" target="_blank" rel="noopener">첨부 파일 보기</a></div>':'<pre>'+esc(d.v)+'</pre>')+'</div>'}).join('');
   else{var r=(i.refs&&i.refs.length)?i.refs.join('\n'):(i.note||'');if(r)h+='<pre>'+esc(r)+'</pre>'}
   return h;
 }
@@ -304,7 +341,7 @@ function updItem(){var s=ST.sel;if(!s)return;var p=byId(s.pid);if(!p)return;
 async function onCartUpload(t){
   var f=t.files&&t.files[0];var cp=t.dataset.cup.split('|');if(!f)return;
   if(f.size>20*1024*1024){ST.upmsg='파일은 20MB 이하만 올릴 수 있습니다.';return render()}
-  var as=null;try{as=await window.claude.use('assets')}catch(e){}
+  var as=null;try{as=await getAssets()}catch(e){}
   if(!as){ST.upmsg='파일 업로드를 사용할 수 없습니다. 로그인 상태와 권한을 확인해 주세요.';return render()}
   ST.upmsg='업로드 중...';render();
   try{var r=await as.upload(f);var cc=ST.cart.find(function(c){return c.lid===cp[0]});if(cc){cc.inputs=cc.inputs||{};cc.inputs[cp[1]]=r.id;saveCart()}ST.upmsg=''}
@@ -314,7 +351,7 @@ async function onCartUpload(t){
 async function onUpload(t){
   var files=Array.prototype.slice.call(t.files||[]);var kind=t.dataset.up,bi=+t.dataset.i;
   if(!files.length||!ST.pdraft)return;
-  var as=null;try{as=await window.claude.use('assets')}catch(e){}
+  var as=null;try{as=await getAssets()}catch(e){}
   if(!as){ST.upmsg='이미지 업로드는 이 페이지의 편집 권한(Editor 이상)이 있는 계정에서만 쓸 수 있습니다.';return render()}
   ST.upmsg='업로드 중...';render();
   try{
@@ -328,7 +365,7 @@ async function onUpload(t){
   render();
 }
 
-function thumb(p){var id=bid(p.images&&p.images[0]);return id?'<img class="timg" src="/_blob/'+id+'" alt="" loading="lazy">':''}
+function thumb(p){var id=bid(p.images&&p.images[0]);return id?'<img class="timg" src="'+blobUrl(id)+'" alt="" loading="lazy">':''}
 function tile(p){var u=unit(p);
   return '<article class="tile" data-hay="'+esc((p.name+' '+(p.desc||'')).toLowerCase())+'">'+thumb(p)
    +(p.best?'<div class="eyebrow">BEST</div>':'<div class="eyebrow q">'+esc(CATS[p.cat]||'')+'</div>')
@@ -381,7 +418,7 @@ function lineSummary(l){
   getFields(p).forEach(function(f){if(f.stage==='order')return;var v=String((c.inputs&&c.inputs[f.id])||'').trim();if(v)h+='<div class="small"><span class="muted">'+esc(f.label)+'</span><pre>'+esc(v)+'</pre></div>'});
   var og2=getFields(p).filter(function(f){return f.stage==='order'});
   if(og2.length){h+='<div class="optbox" style="margin-block:.4rem"><strong>추가정보 입력</strong>'+og2.map(function(f){var v=(c.inputs&&c.inputs[f.id])||'';var k=esc(c.lid)+'|'+esc(f.id);var lab=esc(f.label)+(f.required?' *':'');
-    if(f.type==='file')return '<label>'+lab+(f.help?' <span class="muted small" style="font-weight:400">'+esc(f.help)+'</span>':'')+'<input type="file" accept="application/pdf,image/*" data-cup="'+k+'">'+(v?'<span class="small"><span class="chip ok">업로드됨</span> <a href="/_blob/'+bid(v)+'" target="_blank" rel="noopener">파일 보기</a></span>':'')+'</label>';
+    if(f.type==='file')return '<label>'+lab+(f.help?' <span class="muted small" style="font-weight:400">'+esc(f.help)+'</span>':'')+'<input type="file" accept="application/pdf,image/*" data-cup="'+k+'">'+(v?'<span class="small"><span class="chip ok">업로드됨</span> <a href="'+blobUrl(bid(v))+'" target="_blank" rel="noopener">파일 보기</a></span>':'')+'</label>';
     return '<label>'+lab+'<input data-cin="'+k+'" value="'+esc(v)+'"></label>'}).join('')+(ST.upmsg?'<p class="small muted">'+esc(ST.upmsg)+'</p>':'')+'</div>'}
   return h;
 }
@@ -415,7 +452,7 @@ function pageCart(){
 function renderBlock(b){
   if(b.t==='h')return '<h2 style="font-size:1.5rem;font-weight:600;letter-spacing:-.02em">'+esc(b.text)+'</h2>';
   if(b.t==='note')return '<div class="demo" style="white-space:pre-wrap">'+esc(b.text)+'</div>';
-  if(b.t==='img'){var id=bid(b.img);return id?'<img src="/_blob/'+id+'" alt="" loading="lazy">':''}
+  if(b.t==='img'){var id=bid(b.img);return id?'<img src="'+blobUrl(id)+'" alt="" loading="lazy">':''}
   return '<p style="white-space:pre-wrap">'+esc(b.text)+'</p>';
 }
 function selTotal(p){return lineUnit(p,ST.sel.opts)*ST.sel.qty}
@@ -425,8 +462,8 @@ function pageItem(pid){
   if(!ST.sel||ST.sel.pid!==pid){ST.sel={pid:pid,qty:ST.presetQty||p.minQty||1,opts:{},inputs:{}};ST.gi=0;ST.ierr='';ST.presetQty=0}
   var s=ST.sel;var u=unit(p);var imgs=(p.images||[]).map(bid).filter(Boolean);
   var gi=Math.min(ST.gi||0,Math.max(imgs.length-1,0));
-  var gal='<div class="gal"><div class="main">'+(imgs.length?'<img src="/_blob/'+imgs[gi]+'" alt="'+esc(p.name)+'">':'<span class="noimg">이미지 준비 중</span>')+'</div>'
-   +(imgs.length>1?'<div class="ths">'+imgs.map(function(id,i){return '<button type="button" data-act="gal" data-i="'+i+'" aria-pressed="'+(i===gi)+'" aria-label="이미지 '+(i+1)+'"><img src="/_blob/'+id+'" alt=""></button>'}).join('')+'</div>':'')+'</div>';
+  var gal='<div class="gal"><div class="main">'+(imgs.length?'<img src="'+blobUrl(imgs[gi])+'" alt="'+esc(p.name)+'">':'<span class="noimg">이미지 준비 중</span>')+'</div>'
+   +(imgs.length>1?'<div class="ths">'+imgs.map(function(id,i){return '<button type="button" data-act="gal" data-i="'+i+'" aria-pressed="'+(i===gi)+'" aria-label="이미지 '+(i+1)+'"><img src="'+blobUrl(id)+'" alt=""></button>'}).join('')+'</div>':'')+'</div>';
   var og=getOpts(p).map(function(g){return '<label>'+esc(g.name)+(g.required?' *':'')+'<select data-opt="'+esc(g.id)+'"><option value="">'+esc(g.placeholder||'선택하세요')+'</option>'+g.choices.map(function(c,i){return '<option value="'+i+'"'+(String(s.opts[g.id])===String(i)?' selected':'')+'>'+esc(c.label)+(Number(c.add)?' (+'+won(c.add)+')':'')+'</option>'}).join('')+'</select></label>'}).join('');
   var fh=getFields(p).filter(function(f){return f.stage!=='order'}).map(function(f){
     var v=s.inputs[f.id]!=null?s.inputs[f.id]:'';
@@ -505,7 +542,7 @@ function pageLogin(){
    :'<div class="form" style="margin-top:0"><label>아이디<input id="lgId" autocomplete="username"></label><label>비밀번호<input id="lgPw" type="password" autocomplete="current-password"></label></div>'+(ST.lerr?'<p class="err" role="alert">'+esc(ST.lerr)+'</p>':'')+'<button class="btn" data-act="login"'+(ST.busy?' disabled':'')+'>로그인</button>';
   var demo='<div class="demo"><strong>샘플 계정</strong><p class="muted">테스트용 계정입니다. 누르면 입력칸에 채워집니다.</p>'
    +[['buyer01','buyer1234','주문자 · 김셀러'],['buyer02','buyer1234','주문자 · 이쇼피'],['buyer03','buyer1234','주문자 · 박큐텐'],['admin','admin1234','관리자']].map(function(a){return '<div class="row"><span><span class="num">'+a[0]+' / '+a[1]+'</span> <span class="muted">'+a[2]+'</span></span><button class="btn ghost sm" data-act="fill" data-id="'+a[0]+'" data-pw="'+a[1]+'">입력</button></div>'}).join('')+'</div>';
-  return '<div class="authbox"><h1 class="ph" style="text-align:center;margin:0">'+(up?'계정 만들기.':'로그인.')+'</h1>'+(ST.loginMsg?'<p class="banner" style="border-radius:12px">'+esc(ST.loginMsg)+'</p>':'')+tabs+'<div class="card" style="display:grid;gap:1rem">'+form+'</div>'+demo+(ST.db?'':'<p class="small muted" style="text-align:center">저장소에 연결되지 않아 로그인할 수 없습니다.</p>')+'</div>';
+  return '<div class="authbox"><h1 class="ph" style="text-align:center;margin:0">'+(up?'계정 만들기.':'로그인.')+'</h1>'+(ST.loginMsg?'<p class="banner" style="border-radius:12px">'+esc(ST.loginMsg)+'</p>':'')+tabs+'<div class="card" style="display:grid;gap:1rem">'+form+'</div>'+(SB?'':demo)+(ST.db?'':'<p class="small muted" style="text-align:center">저장소에 연결되지 않아 로그인할 수 없습니다. Claude 공유 링크 또는 Supabase 설정이 필요합니다.</p>')+'</div>';
 }
 function orderCard(o){
   var refs=o.items.map(function(i){return '<li>'+esc(i.name)+' × '+i.qty+itemDetail(i)+'</li>'}).join('');
@@ -586,7 +623,7 @@ function pageAdmin(){
       return '<article class="card ord" data-uid="'+esc(d._id)+'"><div class="ord-head"><div><strong>'+esc(d.name||'이름 없음')+'</strong> <span class="num small muted">'+esc(d._id)+' · '+esc(d.phone||'')+'</span></div><div class="row"><span class="chip '+(d.role==='admin'?'accent':'ok')+'">'+(d.role==='admin'?'관리자':'주문자')+'</span><span class="small muted">주문 '+(od&&od.list?od.list.length:0)+'건</span></div></div>'
        +'<div class="balance"><div><div class="small muted">적립금</div><strong style="font-size:1.5rem" class="num">'+won(b)+'</strong></div><div class="row"><input data-f="amt" type="number" min="1" placeholder="금액" style="width:8rem" inputmode="numeric"><button class="btn sm" data-act="w-add">충전</button><button class="btn danger sm" data-act="w-sub">차감</button></div></div>'
        +(lg?'<ul style="margin:0;padding-left:1.1rem">'+lg+'</ul>':'')
-       +'<div class="row"><input data-f="npw" type="password" placeholder="새 비밀번호" style="width:11rem"><button class="btn ghost sm" data-act="ac-pw">비밀번호 변경</button>'+(ST.acct&&ST.acct.id===d._id?'':'<button class="btn danger sm" data-act="ac-del">계정 삭제</button>')+'</div></article>'}).join('');
+       +'<div class="row">'+(SB?'':'<input data-f="npw" type="password" placeholder="새 비밀번호" style="width:11rem"><button class="btn ghost sm" data-act="ac-pw">비밀번호 변경</button>')+(ST.acct&&ST.acct.id===d._id?'':'<button class="btn danger sm" data-act="ac-del">계정 삭제</button>')+'</div></article>'}).join('');
   }else if(ST.atab==='prod'){
     body=pageProdAdmin(!(ST.products&&ST.products.length));
   }else if(ST.atab==='notice'){
@@ -614,7 +651,7 @@ function pageProdAdmin(lock){
   return '<div class="sechead"><h2>상품</h2><button class="btn ghost sm" data-act="pe-new"'+(lock?' disabled':'')+'>상품 추가</button></div>'
    +(empty?'<div class="demo" style="margin-bottom:1rem">저장소에 상품이 없어 기본 상품을 보여주고 있습니다. 편집하기 전에 먼저 등록하세요.<div><button class="btn sm" data-act="p-seed">기본 상품 등록</button></div></div>':'')
    +products().map(function(p){var id=bid((p.images||[])[0]);
-     return '<article class="card ord" data-pid="'+esc(p.id)+'"><div class="ord-head"><div class="row">'+(id?'<img src="/_blob/'+id+'" alt="" style="width:3.2rem;height:3.2rem;object-fit:cover;border-radius:10px">':'')
+     return '<article class="card ord" data-pid="'+esc(p.id)+'"><div class="ord-head"><div class="row">'+(id?'<img src="'+blobUrl(id)+'" alt="" style="width:3.2rem;height:3.2rem;object-fit:cover;border-radius:10px">':'')
       +'<div><strong>'+esc(p.name)+'</strong><div class="small muted num">'+esc(CATS[p.cat]||'')+' · '+won(unit(p))+' · 옵션 '+getOpts(p).length+' · 입력항목 '+getFields(p).length+' · 상세 '+((p.detail||[]).length)+'블록</div></div></div>'
       +'<div class="row">'+(p.best?'<span class="chip accent">BEST</span>':'')+(p.soldout?'<span class="chip bad">품절</span>':'')+(p.hidden?'<span class="chip warn">숨김</span>':'')+'</div></div>'
       +'<div class="row"><button class="btn sm" data-act="pe-edit" data-id="'+esc(p.id)+'"'+(lock?' disabled':'')+'>편집</button><a class="btn ghost sm" href="#item-'+esc(p.id)+'">상세 보기</a>'
@@ -635,7 +672,7 @@ function prodEditor(d){
    +'<div class="row">'+ck('best','BEST',d.best)+ck('soldout','품절',d.soldout)+ck('hidden','숨김',d.hidden)+ck('needAddr','배송지 필요',d.needAddr)+ck('hideQty','수량 선택 숨김',d.hideQty)+'</div></article>';
   // images
   h+='<article class="card ord"><h3>상품 이미지</h3><p class="small muted">첫 번째 이미지가 목록과 상세 대표 이미지로 쓰입니다.</p><div class="ths" style="margin:0">'
-   +(d.images||[]).map(function(id,i){return '<figure style="margin:0;display:grid;gap:.3rem;justify-items:center"><img src="/_blob/'+bid(id)+'" alt="" style="width:6rem;height:6rem;object-fit:cover;border-radius:12px"><div class="row" style="gap:.3rem">'+(i?'<button class="btn ghost sm" data-act="pe-img-first" data-i="'+i+'">대표</button>':'<span class="chip accent">대표</span>')+'<button class="btn danger sm" data-act="pe-img-del" data-i="'+i+'">삭제</button></div></figure>'}).join('')+'</div>'
+   +(d.images||[]).map(function(id,i){return '<figure style="margin:0;display:grid;gap:.3rem;justify-items:center"><img src="'+blobUrl(bid(id))+'" alt="" style="width:6rem;height:6rem;object-fit:cover;border-radius:12px"><div class="row" style="gap:.3rem">'+(i?'<button class="btn ghost sm" data-act="pe-img-first" data-i="'+i+'">대표</button>':'<span class="chip accent">대표</span>')+'<button class="btn danger sm" data-act="pe-img-del" data-i="'+i+'">삭제</button></div></figure>'}).join('')+'</div>'
    +'<label>이미지 추가<input type="file" accept="image/*" multiple data-up="gallery"></label>'+(ST.upmsg?'<p class="small muted">'+esc(ST.upmsg)+'</p>':'')+'</article>';
   // options
   var gs=getOpts(d);
@@ -659,7 +696,7 @@ function prodEditor(d){
   var BT={h:'제목',p:'본문',note:'안내 박스',img:'이미지'};
   h+='<article class="card ord"><div class="ord-head"><h3>상세페이지</h3><div class="row"><button class="btn ghost sm" data-act="pe-add" data-k="detail" data-t="h">+ 제목</button><button class="btn ghost sm" data-act="pe-add" data-k="detail" data-t="p">+ 본문</button><button class="btn ghost sm" data-act="pe-add" data-k="detail" data-t="note">+ 안내</button></div></div><p class="small muted">위에서 아래 순서로 상세정보 탭에 보입니다.</p>'
    +(d.detail||[]).map(function(b,i){return '<div class="card" style="background:var(--bg)"><div class="ord-head"><span class="chip accent">'+BT[b.t]+'</span><div class="row"><button class="btn ghost sm" data-act="pe-up" data-k="detail" data-i="'+i+'">↑</button><button class="btn ghost sm" data-act="pe-down" data-k="detail" data-i="'+i+'">↓</button><button class="btn danger sm" data-act="pe-rm" data-k="detail" data-i="'+i+'">삭제</button></div></div>'
-     +(b.t==='img'?(b.img?'<img src="/_blob/'+bid(b.img)+'" alt="" style="max-width:100%;border-radius:12px;max-height:20rem;object-fit:contain">':'<p class="muted small">이미지를 올려 주세요.</p>')+'<label>이미지 '+(b.img?'교체':'선택')+'<input type="file" accept="image/*" data-up="block" data-i="'+i+'"></label>'
+     +(b.t==='img'?(b.img?'<img src="'+blobUrl(bid(b.img))+'" alt="" style="max-width:100%;border-radius:12px;max-height:20rem;object-fit:contain">':'<p class="muted small">이미지를 올려 주세요.</p>')+'<label>이미지 '+(b.img?'교체':'선택')+'<input type="file" accept="image/*" data-up="block" data-i="'+i+'"></label>'
         :(b.t==='h'?'<input data-dp="detail.'+i+'.text" value="'+esc(b.text)+'">':'<textarea data-dp="detail.'+i+'.text" style="min-height:6rem;font-family:var(--font)">'+esc(b.text)+'</textarea>'))+'</div>'}).join('')
    +'<label>이미지 블록 추가<input type="file" accept="image/*" multiple data-up="newblock"></label></article>';
   h+='<div class="row"><button class="btn" data-act="pe-save"'+(ST.busy?' disabled':'')+'>저장</button><button class="btn ghost" data-act="pe-cancel">목록으로</button></div>';
@@ -737,7 +774,9 @@ async function doLogin(){
   if(!ST.db){ST.lerr='저장소에 연결되지 않았습니다.';return render()}
   if(!id||!pw){ST.lerr='아이디와 비밀번호를 입력해 주세요.';return render()}
   ST.busy=true;render();
-  try{var s=await ST.db.doc('accounts/'+id).get();var ok=s.exists&&s.data().pw===await hashPw(id,pw);
+  try{var s=null,ok=false;
+    if(SB){var lr=await SB.auth.signInWithPassword({email:sbEmail(id),password:pw});if(!lr.error){s=await ST.db.doc('accounts/'+id).get();ok=s.exists}}
+    else{s=await ST.db.doc('accounts/'+id).get();ok=s.exists&&s.data().pw===await hashPw(id,pw)}
     ST.busy=false;
     if(!ok){ST.lerr='아이디 또는 비밀번호가 맞지 않습니다.';return render()}
     setAcct(id,s.data());toast(ST.acct.name+'님, 환영합니다');afterAuth();
@@ -754,9 +793,14 @@ async function doSignup(){
   if(pw!==pw2){ST.lerr='비밀번호 확인이 맞지 않습니다.';return render()}
   if(!document.getElementById('suAgree').checked){ST.lerr='이용약관과 개인정보 처리방침에 동의해 주세요.';return render()}
   ST.busy=true;render();
-  try{var ex=await ST.db.doc('accounts/'+id).get();
-    if(ex.exists){ST.busy=false;ST.lerr='이미 사용 중인 아이디입니다.';return render()}
-    var rec={name:name,phone:phone,role:'buyer',pw:await hashPw(id,pw),createdAt:new Date().toISOString()};
+  try{
+    var rec={name:name,phone:phone,role:'buyer',createdAt:new Date().toISOString()};
+    if(SB){var sr=await SB.auth.signUp({email:sbEmail(id),password:pw});
+      if(sr.error){ST.busy=false;ST.lerr=/registered|already|exists/i.test(sr.error.message)?'이미 사용 중인 아이디입니다.':'가입하지 못했습니다. '+sr.error.message;return render()}
+      if(!sr.data.session){ST.busy=false;ST.lerr='이미 사용 중인 아이디이거나 이메일 확인 설정이 켜져 있습니다.';return render()}}
+    else{var ex=await ST.db.doc('accounts/'+id).get();
+      if(ex.exists){ST.busy=false;ST.lerr='이미 사용 중인 아이디입니다.';return render()}
+      rec.pw=await hashPw(id,pw)}
     await ST.db.doc('accounts/'+id).set(rec);ST.busy=false;
     setAcct(id,rec);toast('가입이 완료되었습니다');afterAuth();
   }catch(e){ST.busy=false;ST.lerr='가입하지 못했습니다. 권한을 확인해 주세요.';render()}
@@ -837,13 +881,15 @@ document.addEventListener('click',async function(e){
   else if(a==='fill'){ST.ltab='in';ST.lerr='';render();document.getElementById('lgId').value=t.dataset.id;document.getElementById('lgPw').value=t.dataset.pw}
   else if(a==='login'){if(!ST.busy)await doLogin()}
   else if(a==='signup'){if(!ST.busy)await doSignup()}
-  else if(a==='logout'){ST.form={pay:'bank',name:'',phone:'',dep:'',addr:'',agree:false,pts:0};ST.cart=[];ST.sel=null;ST.only='';saveCart();setAcct(null);toast('로그아웃했습니다');location.hash='#home'}
+  else if(a==='logout'){ST.form={pay:'bank',name:'',phone:'',dep:'',addr:'',agree:false,pts:0};ST.cart=[];ST.sel=null;ST.only='';saveCart();if(SB){try{SB.auth.signOut()}catch(e){}}setAcct(null);toast('로그아웃했습니다');location.hash='#home'}
   else if(a==='me-save'){var nm=document.getElementById('meName').value.trim(),ph=document.getElementById('mePhone').value.trim();if(!nm||!ph){toast('이름과 연락처를 입력해 주세요');return}
     await ST.db.doc('accounts/'+ST.acct.id).update({name:nm,phone:ph});ST.acct.name=nm;ST.acct.phone=ph;toast('내 정보를 저장했습니다');render()}
   else if(a==='pw-save'){var po=document.getElementById('pwOld').value,pn=document.getElementById('pwNew').value,pn2=document.getElementById('pwNew2').value;
     if(pn.length<6){toast('새 비밀번호는 6자 이상이어야 합니다');return}if(pn!==pn2){toast('새 비밀번호 확인이 맞지 않습니다');return}
-    var ps=await ST.db.doc('accounts/'+ST.acct.id).get();if(!ps.exists||ps.data().pw!==await hashPw(ST.acct.id,po)){toast('현재 비밀번호가 맞지 않습니다');return}
-    await ST.db.doc('accounts/'+ST.acct.id).update({pw:await hashPw(ST.acct.id,pn)});['pwOld','pwNew','pwNew2'].forEach(function(k){document.getElementById(k).value=''});toast('비밀번호를 변경했습니다')}
+    if(SB){var vr=await SB.auth.signInWithPassword({email:sbEmail(ST.acct.id),password:po});if(vr.error){toast('현재 비밀번호가 맞지 않습니다');return}
+      var ur=await SB.auth.updateUser({password:pn});if(ur.error){toast('비밀번호를 변경하지 못했습니다');return}}
+    else{var ps=await ST.db.doc('accounts/'+ST.acct.id).get();if(!ps.exists||ps.data().pw!==await hashPw(ST.acct.id,po)){toast('현재 비밀번호가 맞지 않습니다');return}
+    await ST.db.doc('accounts/'+ST.acct.id).update({pw:await hashPw(ST.acct.id,pn)})}['pwOld','pwNew','pwNew2'].forEach(function(k){document.getElementById(k).value=''});toast('비밀번호를 변경했습니다')}
   else if(a==='iq-add'){var it=document.getElementById('iqTitle').value.trim(),ib=document.getElementById('iqBody').value.trim();if(!it||!ib){toast('제목과 내용을 입력해 주세요');return}
     await ST.db.collection('inquiries').add({uid:ST.acct.id,name:ST.acct.name,title:it,body:ib,at:new Date().toISOString()});document.getElementById('iqTitle').value='';document.getElementById('iqBody').value='';toast('문의를 등록했습니다')}
   else if(a==='cancel-req'){var list=((ST.myDoc&&ST.myDoc.list)||[]).map(function(o){return o.id===id?Object.assign({},o,{cancelRequested:true}):o});
@@ -874,8 +920,13 @@ document.addEventListener('click',async function(e){
   else if(a==='ac-del'){var c7=t.closest('[data-uid]');await ST.db.doc('accounts/'+c7.dataset.uid).delete();toast('계정을 삭제했습니다')}
   else if(a==='ac-new'){var q=function(k){return document.querySelector('#acForm [data-k='+k+']')};var nid=q('id').value.trim().toLowerCase();
     if(!ID_RE.test(nid)){toast('아이디 형식이 맞지 않습니다');return}if(q('pw').value.length<6){toast('비밀번호는 6자 이상이어야 합니다');return}
-    var ex=await ST.db.doc('accounts/'+nid).get();if(ex.exists){toast('이미 사용 중인 아이디입니다');return}
-    await ST.db.doc('accounts/'+nid).set({name:q('name').value.trim()||nid,phone:q('phone').value.trim(),role:q('role').value,pw:await hashPw(nid,q('pw').value),createdAt:new Date().toISOString()});
+    var nrec={name:q('name').value.trim()||nid,phone:q('phone').value.trim(),role:q('role').value,createdAt:new Date().toISOString()};
+    if(SB){var sb2=window.supabase.createClient(window.SB_CFG.url,window.SB_CFG.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storageKey:'sp-aux'}});
+      var r2=await sb2.auth.signUp({email:sbEmail(nid),password:q('pw').value});
+      if(r2.error||!r2.data||!r2.data.user){toast('계정을 만들지 못했습니다. 이미 있는 아이디일 수 있습니다.');return}
+      var ir=await SB.from('docs').insert({coll:'accounts',id:nid,data:nrec,uid:r2.data.user.id});if(ir.error){toast('계정 정보를 저장하지 못했습니다');return}}
+    else{var ex=await ST.db.doc('accounts/'+nid).get();if(ex.exists){toast('이미 사용 중인 아이디입니다');return}
+      nrec.pw=await hashPw(nid,q('pw').value);await ST.db.doc('accounts/'+nid).set(nrec)}
     ['id','name','phone','pw'].forEach(function(k){q(k).value=''});toast('계정을 만들었습니다')}
   else if(a==='like'){if(needLogin(null))return;var lid2=id+'_'+ST.acct.id;var has=(ST.likes||[]).some(function(x){return x._id===lid2});if(has)await ST.db.doc('likes/'+lid2).delete();else await ST.db.doc('likes/'+lid2).set({pid:id,uid:ST.acct.id})}
   else if(a==='pts-all'){var tl=cartLines().reduce(function(q,l){return q+l.unit*l.qty},0);var bb=(ST.myWallet&&ST.myWallet.balance)||0;ST.form.pts=bb>=PTS_MIN?Math.min(bb,tl):0;render()}
@@ -975,9 +1026,12 @@ app.addEventListener('keydown',function(e){if(e.key!=='Enter')return;var t=e.tar
 async function boot(){
   route();
   var cl=window.claude;
-  if(!cl||!cl.use){ST.ready=true;route();return}
-  try{var u=await cl.use('user');if(u)ST.write=await u.can('data.write')}catch(e){}
-  try{ST.db=await cl.use('db')}catch(e){}
+  if((!cl||!cl.use)&&window.SB_CFG&&window.supabase&&window.supabase.createClient){
+    SB=window.supabase.createClient(window.SB_CFG.url,window.SB_CFG.key);ST.db=sbMakeDb(SB);ST.write=true}
+  else if(!cl||!cl.use){ST.ready=true;route();return}
+  else{
+    try{var u=await cl.use('user');if(u)ST.write=await u.can('data.write')}catch(e){}
+    try{ST.db=await cl.use('db')}catch(e){}}
   var db=ST.db;
   if(!db){ST.ready=true;route();return}
   var er=function(){};
@@ -988,7 +1042,9 @@ async function boot(){
   db.collection('pqa').onSnapshot(function(s){ST.pqa=snapList(s);refresh()},er);
   db.collection('qreplies').onSnapshot(function(s){var m={};s.docs.forEach(function(d){m[d.id]=d.data()});ST.qrep=m;refresh()},er);
   db.doc('settings/site').onSnapshot(function(s){ST.settings=s.exists?s.data():{};refresh()},er);
-  var sid=null;try{sid=localStorage.getItem('sp-sess')}catch(e){}
+  var sid=null;
+  if(SB){try{var gs=await SB.auth.getSession();var em=gs.data&&gs.data.session&&gs.data.session.user&&gs.data.session.user.email;if(em)sid=em.split('@')[0]}catch(e){}}
+  else{try{sid=localStorage.getItem('sp-sess')}catch(e){}}
   if(sid){try{var a=await db.doc('accounts/'+sid).get();if(a.exists)setAcct(sid,a.data());else setAcct(null)}catch(e){}}
   ST.ready=true;route();
 }
