@@ -54,7 +54,7 @@ function pageAdmin(){
         +'<p style="white-space:pre-wrap">'+esc(q.body)+'</p><label>답변<textarea data-f="reply" style="font-family:var(--font)">'+esc(r?r.text:'')+'</textarea></label><div><button class="btn sm" data-act="iq-reply">답변 등록</button></div></article>'}).join('')
      +(qs.length?'':'<p class="muted">접수된 문의가 없습니다.</p>');
   }else{
-    var s=ST.settings||{};var F=[['banner','상단 안내 문구'],['bank','입금 은행'],['account','계좌번호'],['holder','예금주'],['bizName','상호명'],['ceo','대표자'],['bizNo','사업자등록번호'],['mailOrder','통신판매업 신고번호'],['bizAddr','사업장 주소'],['tel','연락처'],['hours','운영 시간']];
+    var s=ST.settings||{};var F=[['bank','입금 은행'],['account','계좌번호'],['holder','예금주'],['bizName','상호명'],['ceo','대표자'],['bizNo','사업자등록번호'],['mailOrder','통신판매업 신고번호'],['bizAddr','사업장 주소'],['tel','연락처'],['hours','운영 시간']];
     var L=[['terms','이용약관'],['privacy','개인정보 처리방침'],['refund','환불 규정']];
     body='<div class="card"><h2 style="font-size:1.3rem;font-weight:600">사이트 설정</h2><div class="form" id="setForm"><div class="fgrid">'+F.map(function(x){return '<label>'+x[1]+'<input data-k="'+x[0]+'" value="'+esc(s[x[0]])+'"></label>'}).join('')+'</div>'
      +L.map(function(x){return '<label>'+x[1]+' <span class="muted small">고객에게 그대로 표시됩니다</span><textarea data-k="'+x[0]+'" style="font-family:var(--font);min-height:8rem">'+esc(s[x[0]])+'</textarea></label>'}).join('')
