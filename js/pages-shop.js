@@ -11,22 +11,22 @@ function tile(p){var u=unit(p);
 function pageHome(){
   var ps=activeProducts();var reg=ps.filter(function(p){return p.type==='register'});
   var low=reg.length?Math.min.apply(null,reg.map(unit)):0;
-  if(!ST.calc.pid&&ps.length)ST.calc.pid=(reg[0]||ps[0]).id;
-  var cp=byId(ST.calc.pid)||ps[0];
-  var opts=ps.filter(function(p){return !p.soldout}).map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===ST.calc.pid?' selected':'')+'>'+esc(p.name)+'</option>'}).join('');
   var feat=ps.filter(function(p){return !p.soldout}).sort(function(a,b){return (b.best?1:0)-(a.best?1:0)||(a.order||0)-(b.order||0)}).slice(0,4);
   var ns=(ST.notices||[]).slice(0,3).map(function(n){return '<li class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-block:.8rem"><a href="#notices">'+esc(n.title)+'</a><span class="num small muted">'+esc((n.at||'').slice(0,10))+'</span></li>'}).join('');
-  return '<section class="hero"><h1 class="big">엄배송. <span>배송등록,<br>이렇게 간단하게.</span></h1>'
+  var routes=['ICN → SGP','ICN → KUL','ICN → MNL','ICN → BKK','ICN → SGN','ICN → TPE','ICN → NRT','ICN → CGK'];
+  var mq=routes.concat(routes).map(function(r){return '<span>'+r+'</span>'}).join('');
+  return '<section class="hero"><div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div><h1 class="big"><span class="grad">엄배송.</span> <span>배송등록,<br>이렇게 간단하게.</span></h1>'
    +'<p class="lead">쇼피와 큐텐 주문번호만 적어 보내세요. 배송등록과 합배송 접수'+(low?'는 건당 '+won(low)+'부터':'')+' 시작합니다.</p>'
    +'<div class="row"><a class="btn" href="#services" data-auth="1">배송등록 신청하기</a><a class="btn ghost" href="#mypage" data-auth="1">주문 조회</a></div></section>'
+   +'<div class="marquee" aria-hidden="true"><div class="mq-track">'+mq+'</div></div>'
+   +'<section class="feats"><article><b class="num">'+(low?won(low):'1,900원')+'~</b><h3>건당 합리적인 요금</h3><p>쇼피·큐텐 배송등록을 건당 요금으로 접수합니다.</p></article>'
+   +'<article><b>1분</b><h3>주문번호만 붙여넣기</h3><p>한 줄에 하나씩 적고 송장 PDF만 올리면 끝납니다.</p></article>'
+   +'<article><b>실시간</b><h3>처리 상태 확인</h3><p>입금 확인부터 발송 완료까지 마이페이지에서 바로 확인합니다.</p></article></section>'
    +'<section class="showcase"><div class="eyebrow">라벨 한 장까지</div><h2>접수부터 송장 라벨까지,<br>한곳에서.</h2>'
    +'<div class="label" role="img" aria-label="송장 라벨 예시"><div class="label-top"><span>SAMPLE</span><span>100×100</span></div>'
    +'<div class="label-route">ICN → SGP</div><div class="small muted">EB20261121-4821</div><div class="barcode"></div>'
    +'<dl><dt>PCS</dt><dd>1</dd><dt>WEIGHT</dt><dd>480 g</dd><dt>MARKET</dt><dd>SHOPEE SG</dd></dl><div class="label-foot">예시 라벨 · 실제 송장이 아닙니다</div></div></section>'
    +'<section><div class="sechead"><h2>인기 서비스.</h2><a class="lnk" href="#services">전체 보기</a></div><div class="tiles">'+feat.map(tile).join('')+'</div></section>'
-   +'<section><div class="card calc"><h2 style="font-size:1.6rem;font-weight:600;letter-spacing:-.025em">요금 계산.</h2><p class="muted small">서비스와 수량을 고르면 합계가 바로 나옵니다.</p>'
-   +'<div class="calc2"><label>서비스<select id="calcPid">'+opts+'</select></label><label>수량<input id="calcQty" type="number" min="1" max="999" value="'+esc(ST.calc.qty)+'" inputmode="numeric"></label></div>'
-   +'<div class="row" style="justify-content:space-between"><div><div class="small muted">합계</div><div class="total num" id="calcTotal">'+won(cp?unit(cp)*ST.calc.qty:0)+'</div></div><button class="btn" data-act="calc-add">상품 선택하기</button></div></div></section>'
    +'<section><div class="sechead"><h2>이용 방법.</h2></div><ol class="steps">'
    +'<li><h3>마켓에서 판매</h3><p class="muted small">쇼피나 큐텐에서 주문이 들어오면 주문번호를 복사해 둡니다.</p></li>'
    +'<li><h3>서비스 담고 신청</h3><p class="muted small">배송등록을 담고 주문번호를 한 줄에 하나씩 붙여 넣습니다.</p></li>'

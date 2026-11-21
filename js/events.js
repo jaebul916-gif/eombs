@@ -7,7 +7,6 @@ document.addEventListener('click',async function(e){
   var t=e.target.closest('[data-act]');if(!t)return;var a=t.dataset.act;var id=t.dataset.id;
   try{
   if(a==='add'){if(needLogin({id:id,qty:1}))return;addToCart(id,1)}
-  else if(a==='calc-add'){ST.sel=null;ST.presetQty=Math.max(1,parseInt(ST.calc.qty,10)||1);location.hash='#item-'+ST.calc.pid}
   else if(a==='cat'){ST.cat=t.dataset.v;render()}
   else if(a==='rm'){ST.cart=ST.cart.filter(function(c){return c.lid!==id});if(ST.only===id)ST.only='';saveCart();render()}
   else if(a==='clear'){ST.cart=[];ST.only='';saveCart();render()}
@@ -150,7 +149,6 @@ app.addEventListener('input',function(e){var t=e.target;
   if(t.dataset.in!==undefined){if(!ST.sel)return;ST.sel.inputs[t.dataset.in]=t.type==='checkbox'?(t.checked?'Y':''):t.value;updItem();return}
   if(t.dataset.note!==undefined){var l=ST.cart.find(function(c){return c.pid===t.dataset.note});if(l){l.note=t.value;saveCart();var cn=document.getElementById('cnt-'+t.dataset.note);if(cn)cn.textContent='입력 '+noteCount(t.value)+' / 수량 '+l.qty}}
   else if(t.dataset.form){ST.form[t.dataset.form]=t.type==='checkbox'?t.checked:t.value}
-  else if(t.id==='calcQty'||t.id==='calcPid'){if(t.id==='calcQty')ST.calc.qty=Math.max(1,parseInt(t.value,10)||1);else ST.calc.pid=t.value;var p=byId(ST.calc.pid);document.getElementById('calcTotal').textContent=won(p?unit(p)*ST.calc.qty:0)}
   else if(t.id==='ordFilter'){var q=t.value.trim().toLowerCase();var any=false;app.querySelectorAll('.ord[data-hay]').forEach(function(el){var m=!q||el.dataset.hay.indexOf(q)>=0;el.hidden=!m;if(m)any=true});var nh=document.getElementById('noHit');if(nh)nh.hidden=any||!app.querySelector('.ord[data-hay]')}
   else if(t.id==='svcQ'||t.id==='aSearch'){var qq=t.value.trim().toLowerCase();var sel=t.id==='svcQ'?'.tile[data-hay]':'.ord[data-hay]';app.querySelectorAll(sel).forEach(function(el){el.hidden=!!qq&&el.dataset.hay.indexOf(qq)<0})}
 });

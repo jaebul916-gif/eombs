@@ -77,7 +77,42 @@ label{display:grid;gap:.3rem;font-weight:500;font-size:.85rem}
 .eyebrow{font-size:.75rem;font-weight:600;color:var(--warn);letter-spacing:.02em}
 .eyebrow.q{color:var(--muted)}
 
-.hero{text-align:center;display:grid;gap:1.1rem;justify-items:center;padding-block:2rem 0}
+.hero{text-align:center;display:grid;gap:1.1rem;justify-items:center;padding-block:3.5rem 2.5rem;position:relative;isolation:isolate}
+.hero::before{content:"";position:absolute;inset:-2rem -50vw 0;z-index:-2;background-image:radial-gradient(color-mix(in srgb,var(--ink) 16%,transparent) 1px,transparent 1.5px);background-size:22px 22px;-webkit-mask-image:radial-gradient(ellipse 60% 70% at 50% 40%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse 60% 70% at 50% 40%,#000 20%,transparent 75%)}
+.aurora{position:absolute;inset:-3rem -50vw 0;z-index:-1;pointer-events:none;overflow:hidden;-webkit-mask-image:linear-gradient(#000 60%,transparent);mask-image:linear-gradient(#000 60%,transparent)}
+.aurora i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;will-change:transform}
+.aurora i:nth-child(1){width:34rem;height:34rem;left:calc(50% - 30rem);top:-6rem;background:#7fb8ff;animation:drift1 16s ease-in-out infinite alternate}
+.aurora i:nth-child(2){width:30rem;height:30rem;left:calc(50% - 6rem);top:-3rem;background:#c4a2ff;animation:drift2 19s ease-in-out infinite alternate}
+.aurora i:nth-child(3){width:26rem;height:26rem;left:calc(50% - 16rem);top:6rem;background:#ffc9a3;animation:drift3 22s ease-in-out infinite alternate}
+:root[data-theme="dark"] .aurora i{opacity:.4}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .aurora i{opacity:.4}}
+@keyframes drift1{to{transform:translate(8rem,4rem) scale(1.15)}}
+@keyframes drift2{to{transform:translate(-9rem,6rem) scale(.9)}}
+@keyframes drift3{to{transform:translate(7rem,-3rem) scale(1.2)}}
+.grad{background:linear-gradient(100deg,#0071e3,#7b5cff 45%,#ff6a3d 90%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s ease-in-out infinite alternate}
+.big .grad{color:transparent}
+@keyframes shine{to{background-position:100% 0}}
+.hero>*:not(.aurora){animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+.hero>.lead{animation-delay:.1s}.hero>.row{animation-delay:.2s}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.marquee{overflow:hidden;margin-block:1rem 2rem;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.mq-track{display:flex;gap:3rem;width:max-content;animation:mq 32s linear infinite;font-family:var(--mono);font-size:1.05rem;letter-spacing:.12em;color:var(--muted)}
+.mq-track span::before{content:"✈";margin-right:.7rem;color:var(--accent)}
+.marquee:hover .mq-track{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(-50%)}}
+.feats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-bottom:2rem}
+.feats article{background:var(--tile);border-radius:28px;padding:1.8rem 1.6rem;display:grid;gap:.5rem;position:relative;overflow:hidden;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.feats article::after{content:"";position:absolute;inset:auto -30% -60% auto;width:14rem;height:14rem;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 28%,transparent),transparent);transition:transform .5s}
+.feats article:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,.12)}
+.feats article:hover::after{transform:scale(1.4) translate(-10%,-10%)}
+.feats b{font-size:2.2rem;font-weight:700;letter-spacing:-.03em;background:linear-gradient(100deg,var(--accent),#7b5cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.feats h3{font-size:1.15rem;font-weight:600}
+.feats p{color:var(--muted);font-size:.95rem}
+@media (max-width:760px){.feats{grid-template-columns:minmax(0,1fr)}.aurora i{filter:blur(50px)}}
+.tile{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.tile:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,.12)}
+.tile .timg{transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.tile:hover .timg{transform:scale(1.05)}
 .hero .lead{color:var(--muted);font-size:clamp(1.05rem,2.4vw,1.3rem);max-width:36rem}
 .hero .row{justify-content:center;margin-top:.4rem}
 .showcase{background:var(--tile);border-radius:28px;padding:3rem 1.5rem 2.5rem;text-align:center;display:grid;gap:1.5rem;justify-items:center}
