@@ -395,14 +395,14 @@ function pageCart(){
   var html=lines.map(function(l){var p=l.p;var lid=esc(l.c.lid);
     return '<article class="card line"><div class="line-head"><h3 style="font-size:1.15rem"><a href="#item-'+esc(p.id)+'" style="color:inherit">'+esc(p.name)+'</a></h3><div class="row"><button class="btn ghost sm" data-act="line-edit" data-id="'+lid+'">수정</button><button class="btn ghost sm" data-act="rm" data-id="'+lid+'">삭제</button></div></div>'+lineSummary(l)
      +'<div class="line-head">'+(p.hideQty?'<span class="muted small">수량 '+l.qty+'</span>':'<div class="qty"><button type="button" data-act="qty" data-id="'+lid+'" data-d="-1" aria-label="수량 줄이기">−</button><span class="num">'+l.qty+'</span><button type="button" data-act="qty" data-id="'+lid+'" data-d="1" aria-label="수량 늘리기">+</button></div>')+'<strong class="num">'+won(l.unit*l.qty)+'</strong></div></article>'}).join('');
-  var action=ST.acct?'<button class="btn" style="width:100%;margin-top:.8rem" data-act="order"'+((ST.busy||!ST.db)?' disabled':'')+'>'+(ST.busy?'접수 중...':'주문하기')+'</button>'
+  var action=ST.acct?'<button class="btn" style="width:100%;margin-top:.8rem" data-act="order"'+((ST.busy||!ST.db)?' disabled':'')+'>'+(ST.busy?'처리 중...':'결제하기')+'</button>'
     :'<p class="small muted" style="margin-top:.8rem">주문하려면 로그인이 필요합니다.</p><a class="btn" style="width:100%;margin-top:.5rem" href="#login">로그인 / 회원가입</a>';
   var side='<aside class="card"><h2 style="font-size:1.4rem;font-weight:600">주문 정보</h2><div class="form">'
    +'<label>이름<input data-form="name" value="'+esc(f.name)+'" autocomplete="name"></label>'
    +'<label>연락처<input data-form="phone" value="'+esc(f.phone)+'" inputmode="tel" autocomplete="tel"></label>'
    +(addrNeeded?'<label>배송지 주소<textarea data-form="addr" style="font-family:var(--font)">'+esc(f.addr)+'</textarea></label>':'')
    +'<div><div class="small" style="font-weight:500;margin-bottom:.4rem">포인트 사용</div><div class="row" style="flex-wrap:nowrap"><input data-form="pts" type="number" min="0" inputmode="numeric" value="'+esc(f.pts||0)+'" style="text-align:right"><button type="button" class="btn ghost sm" data-act="pts-all"'+(usable?'':' disabled')+'>전액사용</button></div><p class="small muted" style="margin-top:.4rem">사용 가능 포인트 <b class="num">'+usable+'</b> / 보유 포인트 <b class="num">'+bal+'</b><br>보유 포인트 '+PTS_MIN.toLocaleString('ko-KR')+' 이상 사용 가능</p></div>'
-   +'<div><div class="small" style="font-weight:500;margin-bottom:.4rem">결제수단</div><div class="radios"><label><input type="radio" checked>무통장입금</label><label style="opacity:.45"><input type="radio" disabled>신용카드</label><label style="opacity:.45"><input type="radio" disabled>가상계좌</label><label style="opacity:.45"><input type="radio" disabled>실시간계좌이체</label><label style="opacity:.45"><input type="radio" disabled>삼성페이</label></div><p class="small muted" style="margin-top:.4rem">카드·가상계좌 등은 결제대행(PG) 연동 후 사용할 수 있습니다.</p></div>'
+   +'<div><div class="small" style="font-weight:500;margin-bottom:.4rem">결제수단</div><div class="radios">'+[['card','신용카드'],['vbank','가상계좌'],['rt','실시간계좌이체'],['bank','무통장입금'],['spay','삼성페이']].map(function(m){return '<label><input type="radio" name="method" data-form="method" value="'+m[0]+'"'+((f.method||'bank')===m[0]?' checked':'')+'>'+m[1]+'</label>'}).join('')+'</div>'+((f.method||'bank')!=='bank'&&pay>0?'<p class="small muted" style="margin-top:.4rem">이 결제수단은 결제대행사(PG) 연동 후 사용할 수 있습니다. 지금은 무통장입금 또는 포인트로 결제해 주세요.</p>':'')+'</div>'
    +(pay>0?'<label>입금자명<input data-form="dep" value="'+esc(f.dep)+'" placeholder="비우면 이름으로 접수"></label><p class="small muted">'+bankText()+'</p>':'<p class="small muted">포인트로 전액 결제됩니다.</p>')
    +'<label class="check"><input type="checkbox" data-form="agree"'+(f.agree?' checked':'')+'>전체 동의</label><label class="check" style="margin-left:1.2rem"><input type="checkbox" data-form="agree"'+(f.agree?' checked':'')+'>구매조건 확인 및 결제진행에 동의</label></div>'
    +'<div class="sum" style="margin-top:1.1rem"><div class="t"><span>서비스 합계</span><span class="num">'+won(total)+'</span></div>'+(pu?'<div class="t"><span>포인트 사용</span><span class="num">-'+won(pu)+'</span></div>':'')+'<div class="t tot"><span>결제 금액</span><span class="num">'+won(pay)+'</span></div></div>'
@@ -790,6 +790,7 @@ async function placeOrder(){
   var total=items.reduce(function(s,i){return s+i.price*i.qty},0);
   var bal0=(ST.myWallet&&ST.myWallet.balance)||0;var us0=bal0>=PTS_MIN?Math.min(bal0,total):0;var pts=Math.max(0,Math.min(us0,Math.floor(Number(f.pts)||0)));
   f.pay=pts>=total?'points':'bank';
+  if(f.pay==='bank'&&(f.method||'bank')!=='bank'){ST.err='선택하신 결제수단은 아직 연결되지 않았습니다. 무통장입금 또는 포인트로 결제해 주세요.';return render()}
   var now=new Date().toISOString();
   var order={id:'o'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),no:'SP'+ymd()+'-'+Math.floor(1000+Math.random()*9000),createdAt:now,pay:f.pay,depositor:f.pay==='bank'?(f.dep.trim()||f.name.trim()):'',
     contact:{name:f.name.trim(),phone:f.phone.trim(),addr:f.addr.trim()},items:items,total:total,pts:pts};
@@ -946,6 +947,7 @@ app.addEventListener('change',function(e){var t=e.target;
   if(t.dataset.cup!==undefined){onCartUpload(t);return}
   if(t.dataset.rr&&t.dataset.dp!==undefined){render();return}
   if(t.dataset.form==='pay'){ST.form.pay=t.value;render()}
+  else if(t.dataset.form==='method'){ST.form.method=t.value;render()}
   else if(t.dataset.sort!==undefined){ST.sort=t.value;render()}
   else if(t.dataset.afilter!==undefined){ST.afilter=t.value;render()}
 });
