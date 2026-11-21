@@ -211,14 +211,27 @@ function dt(iso){try{return new Date(iso).toLocaleString('ko-KR',{year:'numeric'
 var TYPES={register:'배송등록',domestic:'국내택배',storage:'보관',credit:'적립금',goods:'물품'};
 var CATS={all:'전체',shopee:'쇼피',qoo10:'큐텐',etc:'기타'};
 var STATUS={pending:['입금대기','warn'],paid:['결제완료','accent'],working:['처리중','accent'],done:['완료','ok'],canceled:['취소','bad']};
+var COURIERS=['CJ대한통운','한진택배','롯데택배','우체국택배','로젠택배','경동택배','대신택배','GS25편의점택배','CU편의점택배','기타'];
+var REG_FIELDS=[
+ {id:'f1',label:'택배운송장번호',type:'text',required:true,unique:true,placeholder:'필수입력'},
+ {id:'f2',label:'제품명/색상/수량',type:'text',required:true,placeholder:'필수입력'},
+ {id:'f3',label:'상품url',type:'text',required:true,placeholder:'필수입력'},
+ {id:'f4',label:'배송요청사항',type:'text',required:true,placeholder:'필수입력'},
+ {id:'f5',label:'택배사명(예:대한통운)',type:'select',required:true,options:COURIERS,placeholder:'택배사명(예:대한통운) (필수)'},
+ {id:'f6',label:'송장 파일 업로드(PDF)',type:'file',required:true,stage:'order',help:'마켓에서 받은 waybill 파일'}];
+var REG_OPTS=[{id:'g1',name:'옵션',required:true,placeholder:'옵션 (선택)',choices:[{label:'옵션없음',add:0},{label:'박스교체',add:300},{label:'화장품사은품추가',add:300},{label:'맥심모카골드추가',add:300},{label:'마스크팩추가',add:500},{label:'이니스프리마스크팩',add:1000},{label:'대형포장',add:500}]}];
+var REG_DETAIL=[
+ {t:'h',text:'배송등록 사용 방법'},
+ {t:'p',text:'1. 해외 마켓 주문이 들어온 상품을 국내 쇼핑몰에서 구매합니다.\n2. 이 페이지에서 택배 운송장번호, 제품명/색상/수량, 상품 URL, 배송요청사항, 택배사를 입력합니다.\n3. 옵션을 고른 뒤 구매하기를 누르고, 다음 단계에서 마켓 송장 파일(PDF)을 올립니다.\n4. 결제를 마치면 배송지에 도착한 상품을 확인해 접수 후 발송합니다.'},
+ {t:'note',text:'운송장번호는 배대지로 도착할 상품의 번호를 적어 주세요. 같은 번호는 한 번만 접수됩니다. 부분 배송이 필요하면 배송요청사항에 적어 주세요.'},
+ {t:'h',text:'옵션 안내'},
+ {t:'p',text:'옵션없음 (+0원)\n도착한 상품을 완충재로 감싸 그대로 발송합니다.\n\n박스교체 (+300원)\n상품에 맞는 박스로 바꿔 다시 포장해 발송합니다.\n\n화장품사은품추가 (+300원)\n샘플 화장품을 무작위로 함께 넣어 보냅니다.\n\n맥심모카골드추가 (+300원)\n커피 스틱을 함께 넣어 보냅니다.\n\n마스크팩추가 (+500원)\n마스크팩을 함께 넣어 보냅니다.\n\n이니스프리마스크팩 (+1,000원)\n해당 브랜드 마스크팩을 함께 넣어 보냅니다.\n\n대형포장 (+500원)\n가로+세로+높이 합이 1m 이상인 상품일 때 선택해 주세요.'},
+ {t:'note',text:'옵션이 필요 없으면 옵션없음을 선택해 주세요. 입력 후 구매하기를 누르면 추가 정보 입력(송장 업로드)과 결제 단계로 이동합니다.'}];
 var DEFAULTS=[
- {id:'s-shopee',cat:'shopee',type:'register',name:'쇼피 배송등록',desc:'쇼피 주문번호를 입력하면 한 건씩 배송을 접수합니다.',price:2000,sale:1900,unit:'건',best:true,soldout:false,order:1,pointRate:1,
-  options:[{id:'g1',name:'접수 방식',required:true,choices:[{label:'일반 접수',add:0},{label:'당일 우선 접수',add:500}]}],
-  fields:[{id:'f1',label:'쇼피 주문번호',type:'lines',required:true,matchQty:true,placeholder:'예: 2411210ABCD123',help:'한 줄에 하나씩, 수량과 같은 개수'},{id:'f2',label:'판매 국가',type:'select',required:true,options:['싱가포르','말레이시아','태국','필리핀','베트남','대만','브라질'],help:''},{id:'f3',label:'요청 사항',type:'textarea',required:false,placeholder:'',help:''}],
-  detail:[{t:'h',text:'서비스 안내'},{t:'p',text:'쇼피에서 주문이 들어온 건의 주문번호를 남겨 주시면 해당 건의 해외 배송을 접수해 드립니다. 주문번호는 한 줄에 하나씩, 수량과 같은 개수로 입력해 주세요.'},{t:'h',text:'이용 순서'},{t:'p',text:'1. 옵션과 판매 국가를 고르고 주문번호를 입력합니다.\n2. 장바구니에서 입금 정보를 확인해 주문합니다.\n3. 입금이 확인되면 접수가 시작되고, 진행 상태는 마이페이지에서 볼 수 있습니다.'},{t:'note',text:'이미 접수한 주문번호는 중복으로 접수되지 않습니다. 접수 후 취소는 마이페이지의 취소 요청으로 신청해 주세요.'}]},
- {id:'s-shopee-bundle',cat:'shopee',type:'register',name:'쇼피 합배송등록',desc:'같은 구매자의 여러 주문을 한 상자로 묶어 접수합니다.',price:2500,sale:2200,unit:'건',best:false,soldout:false,order:2},
- {id:'s-qoo10',cat:'qoo10',type:'register',name:'큐텐(KSE) 배송등록',desc:'큐텐 주문번호를 입력해 한 건씩 배송을 접수합니다.',price:2000,sale:1900,unit:'건',best:true,soldout:false,order:3},
- {id:'s-qoo10-bundle',cat:'qoo10',type:'register',name:'큐텐(KSE) 합배송등록',desc:'같은 구매자의 큐텐 주문을 한 상자로 묶어 접수합니다.',price:2500,sale:2200,unit:'건',best:false,soldout:false,order:4},
+ {id:'s-shopee',cat:'shopee',type:'register',name:'쇼피 배송등록',desc:'쇼피 주문번호를 입력하면 한 건씩 배송을 접수합니다.',price:2000,sale:1900,unit:'건',best:true,soldout:false,order:1,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
+ {id:'s-shopee-bundle',cat:'shopee',type:'register',name:'쇼피 합배송등록',desc:'같은 구매자의 여러 주문을 한 상자로 묶어 접수합니다.',price:2500,sale:2200,unit:'건',best:false,soldout:false,order:2,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
+ {id:'s-qoo10',cat:'qoo10',type:'register',name:'큐텐(KSE) 배송등록',desc:'큐텐 주문번호를 입력해 한 건씩 배송을 접수합니다.',price:2000,sale:1900,unit:'건',best:true,soldout:false,order:3,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
+ {id:'s-qoo10-bundle',cat:'qoo10',type:'register',name:'큐텐(KSE) 합배송등록',desc:'같은 구매자의 큐텐 주문을 한 상자로 묶어 접수합니다.',price:2500,sale:2200,unit:'건',best:false,soldout:false,order:4,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
  {id:'s-domestic',cat:'etc',type:'domestic',name:'국내 택배 서비스',desc:'국내 구간 택배 발송을 대행합니다. 보내는 곳과 받는 곳을 남겨 주세요.',price:3000,sale:0,unit:'건',best:false,soldout:false,order:5},
  {id:'s-storage',cat:'etc',type:'storage',name:'물품 보관 서비스',desc:'입고된 물품을 보관합니다. 품목과 기간을 요청 메모에 적어 주세요.',price:30000,sale:20000,unit:'건',best:false,soldout:false,order:6},
  {id:'s-credit',cat:'etc',type:'credit',name:'적립금 충전',desc:'적립금을 충전해 다음 주문부터 결제에 사용합니다.',price:10000,sale:0,credit:10000,unit:'회',best:true,soldout:false,order:7},
@@ -226,8 +239,8 @@ var DEFAULTS=[
 ];
 var ST={db:null,write:null,acct:null,admin:false,products:null,notices:null,settings:{},
   myDoc:null,myFulfil:null,myWallet:null,allOrders:null,allFulfil:{},allWallet:{},accounts:null,
-  cart:[],form:{pay:'bank',name:'',phone:'',dep:'',addr:'',agree:false},route:'home',err:'',cat:'all',sort:'pop',
-  calc:{pid:'',qty:1},atab:'orders',afilter:'all',busy:false,pending:false,ltab:'in',lerr:'',ready:false,next:'',pendingAdd:null,loginMsg:'',inq:null,replies:{},adminInq:null,ofilter:'all',sel:null,gi:0,ierr:'',dtab:'info',only:'',modal:null,reviews:[],pqa:[],qrep:{},pedit:'',pdraft:null,pnew:false,pdelc:'',upmsg:'',presetQty:0};
+  cart:[],form:{pay:'bank',name:'',phone:'',dep:'',addr:'',agree:false,pts:0},route:'home',err:'',cat:'all',sort:'pop',
+  calc:{pid:'',qty:1},atab:'orders',afilter:'all',busy:false,pending:false,ltab:'in',lerr:'',ready:false,next:'',pendingAdd:null,loginMsg:'',inq:null,replies:{},adminInq:null,ofilter:'all',sel:null,gi:0,ierr:'',dtab:'info',only:'',modal:null,reviews:[],pqa:[],qrep:{},pedit:'',pdraft:null,pnew:false,pdelc:'',upmsg:'',presetQty:0,likes:[]};
 var subs=[];
 try{var c=JSON.parse(localStorage.getItem('sp-cart')||'[]');if(Array.isArray(c))ST.cart=c.filter(function(x){return x&&x.pid}).map(function(x){return x.lid?x:{lid:newLid(),pid:x.pid,qty:x.qty||1,opts:{},inputs:x.note?{f1:x.note}:{}}})}catch(e){}
 function saveCart(){try{localStorage.setItem('sp-cart',JSON.stringify(ST.cart))}catch(e){}}
@@ -262,14 +275,14 @@ function optAdd(p,sel){var s=0;getOpts(p).forEach(function(g){var i=sel&&sel[g.i
 function lineUnit(p,sel){return unit(p)+optAdd(p,sel)}
 function linesOf(v){return String(v||'').split('\n').map(function(s){return s.trim()}).filter(Boolean)}
 function cartLines(){return ST.cart.map(function(c){var p=byId(c.pid);if(!p)return null;if(ST.only&&c.lid!==ST.only)return null;return {c:c,p:p,qty:c.qty,unit:lineUnit(p,c.opts)}}).filter(Boolean)}
-function validateSel(p,sel){
+function validateSel(p,sel,stage){
   var qty=sel.qty;
   if(p.minQty&&qty<p.minQty)return '최소 주문 수량은 '+p.minQty+'입니다.';
   if(p.maxQty&&qty>p.maxQty)return '최대 주문 수량은 '+p.maxQty+'입니다.';
   var gs=getOpts(p);
   for(var i=0;i<gs.length;i++){var g=gs[i];var v=sel.opts&&sel.opts[g.id];if(g.required&&(v===undefined||v===''))return g.name+' 옵션을 선택해 주세요.'}
   var fs=getFields(p);
-  for(var j=0;j<fs.length;j++){var f=fs[j];var x=String((sel.inputs&&sel.inputs[f.id])||'').trim();
+  for(var j=0;j<fs.length;j++){var f=fs[j];if(stage!=='order'&&f.stage==='order')continue;var x=String((sel.inputs&&sel.inputs[f.id])||'').trim();
     if(f.required&&!x)return f.label+' 항목을 입력해 주세요.';
     if(f.type==='lines'&&f.matchQty&&x&&linesOf(x).length!==qty)return f.label+': '+linesOf(x).length+'개가 입력되었고 수량은 '+qty+'입니다. 개수를 맞춰 주세요.';
     if(f.type==='number'&&x&&isNaN(Number(x)))return f.label+'은(는) 숫자로 입력해 주세요.'}
@@ -278,7 +291,7 @@ function validateSel(p,sel){
 function itemDetail(i){
   var h='';
   if(i.optsText&&i.optsText.length)h+='<div class="small muted">'+esc(i.optsText.join(' · '))+'</div>';
-  if(i.details&&i.details.length)h+=i.details.map(function(d){return '<div class="small"><span class="muted">'+esc(d.k)+'</span><pre>'+esc(d.v)+'</pre></div>'}).join('');
+  if(i.details&&i.details.length)h+=i.details.map(function(d){return '<div class="small"><span class="muted">'+esc(d.k)+'</span>'+(d.file?'<div><a href="/_blob/'+bid(d.file)+'" target="_blank" rel="noopener">첨부 파일 보기</a></div>':'<pre>'+esc(d.v)+'</pre>')+'</div>'}).join('');
   else{var r=(i.refs&&i.refs.length)?i.refs.join('\n'):(i.note||'');if(r)h+='<pre>'+esc(r)+'</pre>'}
   return h;
 }
@@ -288,6 +301,16 @@ function updItem(){var s=ST.sel;if(!s)return;var p=byId(s.pid);if(!p)return;
   var q=document.getElementById('itemQty');if(q)q.textContent=s.qty;
   var tt=document.getElementById('itemTotal');if(tt)tt.textContent=won(selTotal(p));
   getFields(p).forEach(function(f){var e=document.getElementById('cnt-'+f.id);if(e)e.textContent='입력 '+linesOf(s.inputs[f.id]).length+' / 수량 '+s.qty})}
+async function onCartUpload(t){
+  var f=t.files&&t.files[0];var cp=t.dataset.cup.split('|');if(!f)return;
+  if(f.size>20*1024*1024){ST.upmsg='파일은 20MB 이하만 올릴 수 있습니다.';return render()}
+  var as=null;try{as=await window.claude.use('assets')}catch(e){}
+  if(!as){ST.upmsg='파일 업로드를 사용할 수 없습니다. 로그인 상태와 권한을 확인해 주세요.';return render()}
+  ST.upmsg='업로드 중...';render();
+  try{var r=await as.upload(f);var cc=ST.cart.find(function(c){return c.lid===cp[0]});if(cc){cc.inputs=cc.inputs||{};cc.inputs[cp[1]]=r.id;saveCart()}ST.upmsg=''}
+  catch(e){ST.upmsg='업로드하지 못했습니다. PDF 또는 이미지 파일을 확인해 주세요.'}
+  render();
+}
 async function onUpload(t){
   var files=Array.prototype.slice.call(t.files||[]);var kind=t.dataset.up,bi=+t.dataset.i;
   if(!files.length||!ST.pdraft)return;
@@ -355,28 +378,34 @@ function lineSummary(l){
   var p=l.p,c=l.c;var h='';
   var os=getOpts(p).map(function(g){var i=c.opts&&c.opts[g.id];return (i!==undefined&&i!==''&&g.choices[i])?g.name+': '+g.choices[i].label:null}).filter(Boolean);
   if(os.length)h+='<div class="small muted">'+esc(os.join(' · '))+'</div>';
-  getFields(p).forEach(function(f){var v=String((c.inputs&&c.inputs[f.id])||'').trim();if(v)h+='<div class="small"><span class="muted">'+esc(f.label)+'</span><pre>'+esc(v)+'</pre></div>'});
+  getFields(p).forEach(function(f){if(f.stage==='order')return;var v=String((c.inputs&&c.inputs[f.id])||'').trim();if(v)h+='<div class="small"><span class="muted">'+esc(f.label)+'</span><pre>'+esc(v)+'</pre></div>'});
+  var og2=getFields(p).filter(function(f){return f.stage==='order'});
+  if(og2.length){h+='<div class="optbox" style="margin-block:.4rem"><strong>추가정보 입력</strong>'+og2.map(function(f){var v=(c.inputs&&c.inputs[f.id])||'';var k=esc(c.lid)+'|'+esc(f.id);var lab=esc(f.label)+(f.required?' *':'');
+    if(f.type==='file')return '<label>'+lab+(f.help?' <span class="muted small" style="font-weight:400">'+esc(f.help)+'</span>':'')+'<input type="file" accept="application/pdf,image/*" data-cup="'+k+'">'+(v?'<span class="small"><span class="chip ok">업로드됨</span> <a href="/_blob/'+bid(v)+'" target="_blank" rel="noopener">파일 보기</a></span>':'')+'</label>';
+    return '<label>'+lab+'<input data-cin="'+k+'" value="'+esc(v)+'"></label>'}).join('')+(ST.upmsg?'<p class="small muted">'+esc(ST.upmsg)+'</p>':'')+'</div>'}
   return h;
 }
+var PTS_MIN=1000;
 function pageCart(){
   var lines=cartLines();
   if(!lines.length)return '<section class="empty"><h1 class="ph" style="margin:0">장바구니가 비어 있습니다.</h1><p class="muted">서비스를 담으면 여기에 표시됩니다.</p><a class="btn" href="#services">서비스 보기</a></section>';
   var total=lines.reduce(function(s,l){return s+l.unit*l.qty},0);
   var addrNeeded=lines.some(function(l){return needAddr(l.p)});
-  var f=ST.form;var bal=(ST.myWallet&&ST.myWallet.balance)||0;
+  var f=ST.form;var bal=(ST.myWallet&&ST.myWallet.balance)||0;var usable=bal>=PTS_MIN?Math.min(bal,total):0;var pu=Math.max(0,Math.min(usable,Math.floor(Number(f.pts)||0)));var pay=total-pu;
   var html=lines.map(function(l){var p=l.p;var lid=esc(l.c.lid);
     return '<article class="card line"><div class="line-head"><h3 style="font-size:1.15rem"><a href="#item-'+esc(p.id)+'" style="color:inherit">'+esc(p.name)+'</a></h3><div class="row"><button class="btn ghost sm" data-act="line-edit" data-id="'+lid+'">수정</button><button class="btn ghost sm" data-act="rm" data-id="'+lid+'">삭제</button></div></div>'+lineSummary(l)
-     +'<div class="line-head"><div class="qty"><button type="button" data-act="qty" data-id="'+lid+'" data-d="-1" aria-label="수량 줄이기">−</button><span class="num">'+l.qty+'</span><button type="button" data-act="qty" data-id="'+lid+'" data-d="1" aria-label="수량 늘리기">+</button></div><strong class="num">'+won(l.unit*l.qty)+'</strong></div></article>'}).join('');
+     +'<div class="line-head">'+(p.hideQty?'<span class="muted small">수량 '+l.qty+'</span>':'<div class="qty"><button type="button" data-act="qty" data-id="'+lid+'" data-d="-1" aria-label="수량 줄이기">−</button><span class="num">'+l.qty+'</span><button type="button" data-act="qty" data-id="'+lid+'" data-d="1" aria-label="수량 늘리기">+</button></div>')+'<strong class="num">'+won(l.unit*l.qty)+'</strong></div></article>'}).join('');
   var action=ST.acct?'<button class="btn" style="width:100%;margin-top:.8rem" data-act="order"'+((ST.busy||!ST.db)?' disabled':'')+'>'+(ST.busy?'접수 중...':'주문하기')+'</button>'
     :'<p class="small muted" style="margin-top:.8rem">주문하려면 로그인이 필요합니다.</p><a class="btn" style="width:100%;margin-top:.5rem" href="#login">로그인 / 회원가입</a>';
   var side='<aside class="card"><h2 style="font-size:1.4rem;font-weight:600">주문 정보</h2><div class="form">'
    +'<label>이름<input data-form="name" value="'+esc(f.name)+'" autocomplete="name"></label>'
    +'<label>연락처<input data-form="phone" value="'+esc(f.phone)+'" inputmode="tel" autocomplete="tel"></label>'
    +(addrNeeded?'<label>배송지 주소<textarea data-form="addr" style="font-family:var(--font)">'+esc(f.addr)+'</textarea></label>':'')
-   +'<div><div class="small" style="font-weight:500;margin-bottom:.4rem">결제 방법</div><div class="radios"><label><input type="radio" name="pay" data-form="pay" value="bank"'+(f.pay==='bank'?' checked':'')+'>무통장입금</label><label><input type="radio" name="pay" data-form="pay" value="points"'+(f.pay==='points'?' checked':'')+'>적립금</label></div></div>'
-   +(f.pay==='bank'?'<label>입금자명<input data-form="dep" value="'+esc(f.dep)+'" placeholder="비우면 이름으로 접수"></label><p class="small muted">'+bankText()+'</p>':'<p class="small muted">잔액 <span class="num">'+won(bal)+'</span>'+(bal<total?' · 부족합니다. 적립금 충전을 함께 주문할 수 있습니다.':'')+'</p>')
-   +'<label class="check"><input type="checkbox" data-form="agree"'+(f.agree?' checked':'')+'>주문 내용과 입금 확인 후 처리됨을 확인했습니다.</label></div>'
-   +'<div class="sum" style="margin-top:1.1rem"><div class="t"><span>서비스 합계</span><span class="num">'+won(total)+'</span></div><div class="t tot"><span>결제 금액</span><span class="num">'+won(total)+'</span></div></div>'
+   +'<div><div class="small" style="font-weight:500;margin-bottom:.4rem">포인트 사용</div><div class="row" style="flex-wrap:nowrap"><input data-form="pts" type="number" min="0" inputmode="numeric" value="'+esc(f.pts||0)+'" style="text-align:right"><button type="button" class="btn ghost sm" data-act="pts-all"'+(usable?'':' disabled')+'>전액사용</button></div><p class="small muted" style="margin-top:.4rem">사용 가능 포인트 <b class="num">'+usable+'</b> / 보유 포인트 <b class="num">'+bal+'</b><br>보유 포인트 '+PTS_MIN.toLocaleString('ko-KR')+' 이상 사용 가능</p></div>'
+   +'<div><div class="small" style="font-weight:500;margin-bottom:.4rem">결제수단</div><div class="radios"><label><input type="radio" checked>무통장입금</label><label style="opacity:.45"><input type="radio" disabled>신용카드</label><label style="opacity:.45"><input type="radio" disabled>가상계좌</label><label style="opacity:.45"><input type="radio" disabled>실시간계좌이체</label><label style="opacity:.45"><input type="radio" disabled>삼성페이</label></div><p class="small muted" style="margin-top:.4rem">카드·가상계좌 등은 결제대행(PG) 연동 후 사용할 수 있습니다.</p></div>'
+   +(pay>0?'<label>입금자명<input data-form="dep" value="'+esc(f.dep)+'" placeholder="비우면 이름으로 접수"></label><p class="small muted">'+bankText()+'</p>':'<p class="small muted">포인트로 전액 결제됩니다.</p>')
+   +'<label class="check"><input type="checkbox" data-form="agree"'+(f.agree?' checked':'')+'>전체 동의</label><label class="check" style="margin-left:1.2rem"><input type="checkbox" data-form="agree"'+(f.agree?' checked':'')+'>구매조건 확인 및 결제진행에 동의</label></div>'
+   +'<div class="sum" style="margin-top:1.1rem"><div class="t"><span>서비스 합계</span><span class="num">'+won(total)+'</span></div>'+(pu?'<div class="t"><span>포인트 사용</span><span class="num">-'+won(pu)+'</span></div>':'')+'<div class="t tot"><span>결제 금액</span><span class="num">'+won(pay)+'</span></div></div>'
    +(ST.err?'<p class="err" role="alert">'+esc(ST.err)+'</p>':'')
    +(ST.db?'':'<p class="small muted" style="margin-top:.6rem">저장소에 연결되지 않아 주문을 접수할 수 없습니다.</p>')+action+'</aside>';
   return '<div class="sechead"><h1 class="ph" style="margin:0">장바구니.</h1><button class="btn ghost sm" data-act="clear">비우기</button></div>'
@@ -398,14 +427,14 @@ function pageItem(pid){
   var gi=Math.min(ST.gi||0,Math.max(imgs.length-1,0));
   var gal='<div class="gal"><div class="main">'+(imgs.length?'<img src="/_blob/'+imgs[gi]+'" alt="'+esc(p.name)+'">':'<span class="noimg">이미지 준비 중</span>')+'</div>'
    +(imgs.length>1?'<div class="ths">'+imgs.map(function(id,i){return '<button type="button" data-act="gal" data-i="'+i+'" aria-pressed="'+(i===gi)+'" aria-label="이미지 '+(i+1)+'"><img src="/_blob/'+id+'" alt=""></button>'}).join('')+'</div>':'')+'</div>';
-  var og=getOpts(p).map(function(g){return '<label>'+esc(g.name)+(g.required?' <span class="muted small">필수</span>':'')+'<select data-opt="'+esc(g.id)+'"><option value="">선택하세요</option>'+g.choices.map(function(c,i){return '<option value="'+i+'"'+(String(s.opts[g.id])===String(i)?' selected':'')+'>'+esc(c.label)+(Number(c.add)?' (+'+won(c.add)+')':'')+'</option>'}).join('')+'</select></label>'}).join('');
-  var fh=getFields(p).map(function(f){
+  var og=getOpts(p).map(function(g){return '<label>'+esc(g.name)+(g.required?' *':'')+'<select data-opt="'+esc(g.id)+'"><option value="">'+esc(g.placeholder||'선택하세요')+'</option>'+g.choices.map(function(c,i){return '<option value="'+i+'"'+(String(s.opts[g.id])===String(i)?' selected':'')+'>'+esc(c.label)+(Number(c.add)?' (+'+won(c.add)+')':'')+'</option>'}).join('')+'</select></label>'}).join('');
+  var fh=getFields(p).filter(function(f){return f.stage!=='order'}).map(function(f){
     var v=s.inputs[f.id]!=null?s.inputs[f.id]:'';
-    var lab=esc(f.label)+(f.required?'':' <span class="muted small">선택</span>')+(f.help?' <span class="muted small" style="font-weight:400">'+esc(f.help)+'</span>':'');
+    var lab=esc(f.label)+(f.required?' *':'')+(f.help?' <span class="muted small" style="font-weight:400">'+esc(f.help)+'</span>':'');
     var ph=f.placeholder?' placeholder="'+esc(f.placeholder)+'"':'';var id=esc(f.id);
     if(f.type==='textarea'||f.type==='lines')return '<label>'+lab+'<textarea data-in="'+id+'"'+ph+'>'+esc(v)+'</textarea></label>'+(f.type==='lines'&&f.matchQty?'<div class="small num muted" id="cnt-'+id+'">입력 '+linesOf(v).length+' / 수량 '+s.qty+'</div>':'');
     if(f.type==='number')return '<label>'+lab+'<input data-in="'+id+'" type="number" inputmode="decimal" value="'+esc(v)+'"'+ph+'></label>';
-    if(f.type==='select')return '<label>'+lab+'<select data-in="'+id+'"><option value="">선택하세요</option>'+(f.options||[]).map(function(o){return '<option'+(v===o?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select></label>';
+    if(f.type==='select')return '<label>'+lab+'<select data-in="'+id+'"><option value="">'+esc(f.placeholder||'선택하세요')+'</option>'+(f.options||[]).map(function(o){return '<option'+(v===o?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select></label>';
     if(f.type==='radio')return '<div><div class="small" style="font-weight:500;margin-bottom:.4rem">'+lab+'</div><div class="radios">'+(f.options||[]).map(function(o){return '<label><input type="radio" name="r-'+id+'" data-in="'+id+'" value="'+esc(o)+'"'+(v===o?' checked':'')+'>'+esc(o)+'</label>'}).join('')+'</div></div>';
     if(f.type==='checkbox')return '<label class="check"><input type="checkbox" data-in="'+id+'"'+(v==='Y'?' checked':'')+'>'+esc(f.label)+(f.required?'':' <span class="muted small">선택</span>')+'</label>';
     return '<label>'+lab+'<input data-in="'+id+'" value="'+esc(v)+'"'+ph+'></label>';
@@ -433,16 +462,18 @@ function pageItem(pid){
     content=bl||'<p class="muted">등록된 상세 설명이 없습니다.</p>';
   }
   var editing=!!s.editLid;
+  var lk=(ST.likes||[]).filter(function(x){return x.pid===pid});var mine=!!(ST.acct&&lk.some(function(x){return x.uid===ST.acct.id}));
+  var likeBtn='<button type="button" class="btn ghost" data-act="like" data-id="'+esc(pid)+'" aria-pressed="'+mine+'" aria-label="찜">'+(mine?'♥':'♡')+' '+lk.length+'</button>';
   var btns=p.soldout?'<button class="btn" disabled>품절</button>':(editing?'<button class="btn" data-act="item-save" data-id="'+esc(pid)+'">수정 저장</button><button class="btn ghost" data-act="item-cancel">취소</button>':'<button class="btn" data-act="item-buy" data-id="'+esc(pid)+'">구매하기</button><button class="btn ghost" data-act="item-cart" data-id="'+esc(pid)+'">장바구니</button>');
   return '<nav class="crumb muted"><a href="#home">Home</a> › <a href="#services">서비스</a> › '+esc(CATS[p.cat]||'기타')+'</nav>'
    +'<div class="itemtop">'+gal+'<div class="buy"><div class="chips">'+(p.best?'<span class="chip accent">BEST</span>':'')+(disc?'<span class="chip bad">SALE</span>':'')+(p.hidden?'<span class="chip warn">숨김 상품</span>':'')+'</div>'
    +'<h1 class="ph" style="margin:.4rem 0 .6rem;font-size:clamp(1.8rem,4.5vw,2.6rem)">'+esc(p.name)+'</h1>'+(p.desc?'<p class="muted">'+esc(p.desc)+'</p>':'')
    +'<div class="price2" style="margin-block:1rem"><span class="now num">'+won(u)+'</span>'+(u<p.price?' <s class="num">'+won(p.price)+'</s><span class="off">'+disc+'%</span>':'')+' <span class="muted small">/ '+esc(p.unit||'건')+'</span>'+(pts?'<div class="small muted">구매 시 '+won(pts)+' 적립 예정</div>':'')+'</div>'
-   +'<div class="optbox">'+og+fh
-   +'<div><div class="small" style="font-weight:500;margin-bottom:.35rem">수량</div><div class="qty" style="width:max-content"><button type="button" data-act="sq" data-d="-1" aria-label="수량 줄이기">−</button><span class="num" id="itemQty">'+s.qty+'</span><button type="button" data-act="sq" data-d="1" aria-label="수량 늘리기">+</button></div></div>'
+   +'<div class="optbox">'+fh+og
+   +(p.hideQty?'':'<div><div class="small" style="font-weight:500;margin-bottom:.35rem">수량</div><div class="qty" style="width:max-content"><button type="button" data-act="sq" data-d="-1" aria-label="수량 줄이기">−</button><span class="num" id="itemQty">'+s.qty+'</span><button type="button" data-act="sq" data-d="1" aria-label="수량 늘리기">+</button></div></div>')
    +(p.minQty||p.maxQty?'<p class="small muted">'+(p.minQty?'최소 '+p.minQty:'')+(p.minQty&&p.maxQty?' · ':'')+(p.maxQty?'최대 '+p.maxQty:'')+'</p>':'')
    +'<div class="totalbar"><span class="muted">총 금액</span><b class="num" id="itemTotal">'+won(selTotal(p))+'</b></div>'
-   +(ST.ierr?'<p class="err" role="alert">'+esc(ST.ierr)+'</p>':'')+'<div class="row">'+btns+'</div></div></div></div>'
+   +(ST.ierr?'<p class="err" role="alert">'+esc(ST.ierr)+'</p>':'')+'<div class="row">'+btns+likeBtn+'</div></div></div></div>'
    +th+'<div class="detail">'+content+'</div>';
 }
 function renderModal(){
@@ -467,8 +498,8 @@ function orderCard(o){
   var refs=o.items.map(function(i){return '<li>'+esc(i.name)+' × '+i.qty+itemDetail(i)+'</li>'}).join('');
   var hay=(o.no+' '+o.items.map(function(i){return i.name+' '+((i.refs||[]).join(' '))}).join(' ')).toLowerCase();
   return '<article class="card ord" data-hay="'+esc(hay)+'"><div class="ord-head"><div><strong class="num">'+esc(o.no)+'</strong> <span class="muted small">'+dt(o.createdAt)+'</span></div>'+(o.cancelRequested&&o.status!=='canceled'?'<span class="chip warn">취소 요청됨</span>':chip(o.status))+'</div>'
-   +'<ul>'+refs+'</ul><div class="row" style="justify-content:space-between"><span class="small muted">'+(o.pay==='points'?'적립금 결제':'무통장입금'+(o.depositor?' · '+esc(o.depositor):''))+'</span><strong class="num">'+won(o.total)+'</strong></div>'
-   +(o.status==='pending'&&o.pay==='bank'?'<p class="small reply">입금 안내 · '+bankText()+'<br><span class="muted">입금자명 '+esc(o.depositor||'')+' · 입금액 '+won(o.total)+'</span></p>':'')
+   +'<ul>'+refs+'</ul><div class="row" style="justify-content:space-between"><span class="small muted">'+(o.pay==='points'?'포인트 결제':'무통장입금'+(o.depositor?' · '+esc(o.depositor):'')+(o.pts?' · 포인트 '+won(o.pts)+' 사용':''))+'</span><strong class="num">'+won(o.total)+'</strong></div>'
+   +(o.status==='pending'&&o.pay==='bank'?'<p class="small reply">입금 안내 · '+bankText()+'<br><span class="muted">입금자명 '+esc(o.depositor||'')+' · 입금액 '+won(o.total-(o.pts||0))+'</span></p>':'')
    +(o.memo?'<p class="small"><span class="muted">관리자 메모</span> '+esc(o.memo)+'</p>':'')
    +((o.status==='pending'||o.status==='paid')&&!o.cancelRequested?'<div><button class="btn danger sm" data-act="cancel-req" data-id="'+esc(o.id)+'">취소 요청</button></div>':'')+'</article>';
 }
@@ -588,7 +619,7 @@ function prodEditor(d){
    +'<label>적립률 % <span class="muted small">구매 시</span><input type="number" min="0" step="0.1" data-dt="num"'+dpI('pointRate',d.pointRate||0)+'></label><label>충전 금액 <span class="muted small">충전형만</span><input type="number" min="0" data-dt="num"'+dpI('credit',d.credit||0)+'></label>'
    +'<label>단위<input'+dpI('unit',d.unit||'건')+'></label><label>정렬 순서<input type="number" data-dt="num"'+dpI('order',d.order||0)+'></label><label>최소 수량<input type="number" min="0" data-dt="num"'+dpI('minQty',d.minQty||0)+'></label><label>최대 수량<input type="number" min="0" data-dt="num"'+dpI('maxQty',d.maxQty||0)+'></label></div>'
    +'<label>짧은 설명<input'+dpI('desc',d.desc)+'></label>'
-   +'<div class="row">'+ck('best','BEST',d.best)+ck('soldout','품절',d.soldout)+ck('hidden','숨김',d.hidden)+ck('needAddr','배송지 필요',d.needAddr)+'</div></article>';
+   +'<div class="row">'+ck('best','BEST',d.best)+ck('soldout','품절',d.soldout)+ck('hidden','숨김',d.hidden)+ck('needAddr','배송지 필요',d.needAddr)+ck('hideQty','수량 선택 숨김',d.hideQty)+'</div></article>';
   // images
   h+='<article class="card ord"><h3>상품 이미지</h3><p class="small muted">첫 번째 이미지가 목록과 상세 대표 이미지로 쓰입니다.</p><div class="ths" style="margin:0">'
    +(d.images||[]).map(function(id,i){return '<figure style="margin:0;display:grid;gap:.3rem;justify-items:center"><img src="/_blob/'+bid(id)+'" alt="" style="width:6rem;height:6rem;object-fit:cover;border-radius:12px"><div class="row" style="gap:.3rem">'+(i?'<button class="btn ghost sm" data-act="pe-img-first" data-i="'+i+'">대표</button>':'<span class="chip accent">대표</span>')+'<button class="btn danger sm" data-act="pe-img-del" data-i="'+i+'">삭제</button></div></figure>'}).join('')+'</div>'
@@ -596,12 +627,12 @@ function prodEditor(d){
   // options
   var gs=getOpts(d);
   h+='<article class="card ord"><div class="ord-head"><h3>옵션</h3><button class="btn ghost sm" data-act="pe-add" data-k="options">옵션 그룹 추가</button></div><p class="small muted">구매자가 고르는 선택지입니다. 추가금이 있으면 단가에 더해집니다.</p>'
-   +gs.map(function(g,i){return '<div class="card" style="background:var(--bg)"><div class="fgrid"><label>옵션 이름<input'+dpI('options.'+i+'.name',g.name)+'></label></div><div class="row">'+ck('options.'+i+'.required','필수 선택',g.required)+'</div>'
+   +gs.map(function(g,i){return '<div class="card" style="background:var(--bg)"><div class="fgrid"><label>옵션 이름<input'+dpI('options.'+i+'.name',g.name)+'></label><label>선택 안내 문구<input'+dpI('options.'+i+'.placeholder',g.placeholder)+'></label></div><div class="row">'+ck('options.'+i+'.required','필수 선택',g.required)+'</div>'
      +g.choices.map(function(c,j){return '<div class="row"><input style="flex:2;min-width:8rem" placeholder="선택지 이름"'+dpI('options.'+i+'.choices.'+j+'.label',c.label)+'><input style="flex:1;min-width:6rem" type="number" placeholder="추가금" data-dt="num"'+dpI('options.'+i+'.choices.'+j+'.add',c.add||0)+'><button class="btn danger sm" data-act="pe-rm" data-k="options.'+i+'.choices" data-i="'+j+'">삭제</button></div>'}).join('')
      +'<div class="row"><button class="btn ghost sm" data-act="pe-addchoice" data-i="'+i+'">선택지 추가</button><button class="btn ghost sm" data-act="pe-up" data-k="options" data-i="'+i+'">↑</button><button class="btn ghost sm" data-act="pe-down" data-k="options" data-i="'+i+'">↓</button><button class="btn danger sm" data-act="pe-rm" data-k="options" data-i="'+i+'">그룹 삭제</button></div></div>'}).join('')
    +(gs.length?'':'<p class="muted small">옵션이 없습니다.</p>')+'</article>';
   // fields
-  var FT={text:'한 줄',textarea:'여러 줄',lines:'줄 목록(주문번호)',number:'숫자',select:'드롭다운',radio:'라디오',checkbox:'체크박스'};
+  var FT={file:'파일 업로드',text:'한 줄',textarea:'여러 줄',lines:'줄 목록(주문번호)',number:'숫자',select:'드롭다운',radio:'라디오',checkbox:'체크박스'};
   var custom=Array.isArray(d.fields);var fs=getFields(d);
   h+='<article class="card ord"><div class="ord-head"><h3>주문 입력 항목</h3>'+(custom?'<div class="row"><button class="btn ghost sm" data-act="pe-add" data-k="fields">항목 추가</button><button class="btn ghost sm" data-act="pe-fields-reset">기본값으로</button></div>':'<button class="btn ghost sm" data-act="pe-fields-init">직접 편집하기</button>')+'</div>'
    +(custom?'':'<p class="small muted">유형에 따른 기본 항목을 쓰는 중입니다: '+(fs.map(function(f){return esc(f.label)}).join(', ')||'없음')+'</p>')
@@ -609,7 +640,7 @@ function prodEditor(d){
      return '<div class="card" style="background:var(--bg)"><div class="fgrid"><label>항목 이름<input'+dpI('fields.'+i+'.label',f.label)+'></label><label>형식<select data-dp="fields.'+i+'.type" data-rr="1">'+Object.keys(FT).map(function(k){return '<option value="'+k+'"'+(f.type===k?' selected':'')+'>'+FT[k]+'</option>'}).join('')+'</select></label>'
       +'<label>안내 문구<input'+dpI('fields.'+i+'.help',f.help)+'></label><label>예시(placeholder)<input'+dpI('fields.'+i+'.placeholder',f.placeholder)+'></label></div>'
       +(so?'<label>선택지 <span class="muted small">쉼표로 구분</span><input data-dp="fields.'+i+'.options" data-dt="list" value="'+esc((f.options||[]).join(', '))+'"></label>':'')
-      +'<div class="row">'+ck('fields.'+i+'.required','필수',f.required)+(f.type==='lines'?ck('fields.'+i+'.matchQty','수량과 같은 개수',f.matchQty):'')
+      +'<div class="row">'+ck('fields.'+i+'.required','필수',f.required)+(f.type==='lines'?ck('fields.'+i+'.matchQty','수량과 같은 개수',f.matchQty):'')+((f.type==='text'||f.type==='lines')?ck('fields.'+i+'.unique','중복 방지(번호)',f.unique):'')+'<label class="check"><input type="checkbox" data-dp="fields.'+i+'.stage" data-dt="stage"'+(f.stage==='order'?' checked':'')+'>주문 단계에서 입력</label>'
       +'<button class="btn ghost sm" data-act="pe-up" data-k="fields" data-i="'+i+'">↑</button><button class="btn ghost sm" data-act="pe-down" data-k="fields" data-i="'+i+'">↓</button><button class="btn danger sm" data-act="pe-rm" data-k="fields" data-i="'+i+'">삭제</button></div></div>'}).join(''):'')+'</article>';
   // detail
   var BT={h:'제목',p:'본문',note:'안내 박스',img:'이미지'};
@@ -737,7 +768,7 @@ async function placeOrder(){
   var seen={};myOrders().filter(function(o){return o.status!=='canceled'}).forEach(function(o){o.items.forEach(function(i){(i.refs||[]).forEach(function(r){seen[r]=1})})});
   var items=[];
   for(var i=0;i<lines.length;i++){var l=lines[i],p=l.p;
-    var er=validateSel(p,{qty:l.qty,opts:l.c.opts||{},inputs:l.c.inputs||{}});
+    var er=validateSel(p,{qty:l.qty,opts:l.c.opts||{},inputs:l.c.inputs||{}},'order');
     if(er){ST.err=p.name+': '+er;return render()}
     var it={pid:p.id,name:p.name,type:p.type,qty:l.qty,price:l.unit};
     var ot=getOpts(p).map(function(g){var k=(l.c.opts||{})[g.id];return (k!==undefined&&k!==''&&g.choices[k])?g.name+': '+g.choices[k].label:null}).filter(Boolean);
@@ -746,7 +777,8 @@ async function placeOrder(){
     var fl=getFields(p);
     for(var j=0;j<fl.length;j++){var fd=fl[j];var v=String(((l.c.inputs||{})[fd.id])||'').trim();if(!v)continue;
       if(fd.type==='checkbox')v='예';
-      det.push({k:fd.label,v:v});
+      if(fd.type==='file')det.push({k:fd.label,v:'첨부 파일',file:bid(v)});else det.push({k:fd.label,v:v});
+      if(fd.unique&&fd.type!=='lines'){if(seen[v]){ST.err='이미 접수했거나 중복 입력된 번호가 있습니다: '+v;return render()}seen[v]=1;refs.push(v)}
       if(fd.type==='lines'&&fd.matchQty){var rr=linesOf(v);
         for(var k=0;k<rr.length;k++){if(seen[rr[k]]){ST.err='이미 접수했거나 중복 입력된 주문번호가 있습니다: '+rr[k];return render()}seen[rr[k]]=1}
         refs=refs.concat(rr)}}
@@ -756,15 +788,17 @@ async function placeOrder(){
   if(lines.some(function(l){return needAddr(l.p)})&&!f.addr.trim()){ST.err='물품을 받을 배송지 주소를 입력해 주세요.';return render()}
   if(!f.agree){ST.err='확인 항목에 체크해 주세요.';return render()}
   var total=items.reduce(function(s,i){return s+i.price*i.qty},0);
+  var bal0=(ST.myWallet&&ST.myWallet.balance)||0;var us0=bal0>=PTS_MIN?Math.min(bal0,total):0;var pts=Math.max(0,Math.min(us0,Math.floor(Number(f.pts)||0)));
+  f.pay=pts>=total?'points':'bank';
   var now=new Date().toISOString();
   var order={id:'o'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),no:'SP'+ymd()+'-'+Math.floor(1000+Math.random()*9000),createdAt:now,pay:f.pay,depositor:f.pay==='bank'?(f.dep.trim()||f.name.trim()):'',
-    contact:{name:f.name.trim(),phone:f.phone.trim(),addr:f.addr.trim()},items:items,total:total};
+    contact:{name:f.name.trim(),phone:f.phone.trim(),addr:f.addr.trim()},items:items,total:total,pts:pts};
   ST.busy=true;render();
   try{
     var list=((ST.myDoc&&ST.myDoc.list)||[]).slice();list.unshift(order);
     await ST.db.doc('orders/'+ST.acct.id).set({uid:ST.acct.id,name:order.contact.name,phone:order.contact.phone,last:now,list:list});
     var done={};lines.forEach(function(l){done[l.c.lid]=1});
-    ST.cart=ST.cart.filter(function(c){return !done[c.lid]});ST.only='';saveCart();ST.form.agree=false;ST.busy=false;
+    ST.cart=ST.cart.filter(function(c){return !done[c.lid]});ST.only='';saveCart();ST.form.agree=false;ST.form.pts=0;ST.busy=false;
     toast('주문이 접수되었습니다');location.hash='#mypage';
   }catch(e){ST.busy=false;ST.err='주문을 저장하지 못했습니다. 권한을 확인하고 다시 시도해 주세요.';render()}
 }
@@ -787,7 +821,7 @@ document.addEventListener('click',async function(e){
   else if(a==='fill'){ST.ltab='in';ST.lerr='';render();document.getElementById('lgId').value=t.dataset.id;document.getElementById('lgPw').value=t.dataset.pw}
   else if(a==='login'){if(!ST.busy)await doLogin()}
   else if(a==='signup'){if(!ST.busy)await doSignup()}
-  else if(a==='logout'){ST.form={pay:'bank',name:'',phone:'',dep:'',addr:'',agree:false};ST.cart=[];ST.sel=null;ST.only='';saveCart();setAcct(null);toast('로그아웃했습니다');location.hash='#home'}
+  else if(a==='logout'){ST.form={pay:'bank',name:'',phone:'',dep:'',addr:'',agree:false,pts:0};ST.cart=[];ST.sel=null;ST.only='';saveCart();setAcct(null);toast('로그아웃했습니다');location.hash='#home'}
   else if(a==='me-save'){var nm=document.getElementById('meName').value.trim(),ph=document.getElementById('mePhone').value.trim();if(!nm||!ph){toast('이름과 연락처를 입력해 주세요');return}
     await ST.db.doc('accounts/'+ST.acct.id).update({name:nm,phone:ph});ST.acct.name=nm;ST.acct.phone=ph;toast('내 정보를 저장했습니다');render()}
   else if(a==='pw-save'){var po=document.getElementById('pwOld').value,pn=document.getElementById('pwNew').value,pn2=document.getElementById('pwNew2').value;
@@ -803,7 +837,7 @@ document.addEventListener('click',async function(e){
   else if(a==='a-pay'){var c2=t.closest('[data-oid]');var uid=c2.dataset.uid;
     var o=allOrdersFlat().find(function(x){return x.id===c2.dataset.oid&&x.uid===uid});if(!o)return;
     var bal=(ST.allWallet[uid]||{}).balance||0;var en=[];
-    if(o.pay==='points'){if(bal<o.total){toast('적립금 잔액이 부족합니다');return}en.push({delta:-o.total,reason:'주문 '+o.no+' 결제'})}
+    var ded=o.pay==='points'?o.total:(o.pts||0);if(ded>0){if(bal<ded){toast('적립금 잔액이 부족합니다');return}en.push({delta:-ded,reason:'주문 '+o.no+' 결제'})}
     o.items.forEach(function(i){if(i.type==='credit')en.push({delta:(i.credit||i.price)*i.qty,reason:'적립금 충전 '+o.no})});
     if(en.length)await walletSet(uid,en);
     var pp={};pp[o.id]={status:'paid',paidAt:new Date().toISOString(),memo:o.memo||''};await setDocMerge('fulfil/'+uid,{orders:pp});toast('결제를 확인했습니다')}
@@ -827,6 +861,8 @@ document.addEventListener('click',async function(e){
     var ex=await ST.db.doc('accounts/'+nid).get();if(ex.exists){toast('이미 사용 중인 아이디입니다');return}
     await ST.db.doc('accounts/'+nid).set({name:q('name').value.trim()||nid,phone:q('phone').value.trim(),role:q('role').value,pw:await hashPw(nid,q('pw').value),createdAt:new Date().toISOString()});
     ['id','name','phone','pw'].forEach(function(k){q(k).value=''});toast('계정을 만들었습니다')}
+  else if(a==='like'){if(needLogin(null))return;var lid2=id+'_'+ST.acct.id;var has=(ST.likes||[]).some(function(x){return x._id===lid2});if(has)await ST.db.doc('likes/'+lid2).delete();else await ST.db.doc('likes/'+lid2).set({pid:id,uid:ST.acct.id})}
+  else if(a==='pts-all'){var tl=cartLines().reduce(function(q,l){return q+l.unit*l.qty},0);var bb=(ST.myWallet&&ST.myWallet.balance)||0;ST.form.pts=bb>=PTS_MIN?Math.min(bb,tl):0;render()}
   else if(a==='gal'){ST.gi=+t.dataset.i;render()}
   else if(a==='dt'){ST.dtab=t.dataset.v;render()}
   else if(a==='sq'){var s0=ST.sel;if(!s0)return;s0.qty=Math.max(1,Math.min(999,s0.qty+parseInt(t.dataset.d,10)));updItem()}
@@ -894,8 +930,9 @@ document.addEventListener('click',async function(e){
 });
 app.addEventListener('input',function(e){var t=e.target;
   if(t.dataset.dp!==undefined){if(!ST.pdraft)return;var dtp=t.dataset.dt;
-    var vv=dtp==='bool'?t.checked:dtp==='num'?(Number(t.value)||0):dtp==='list'?t.value.split(',').map(function(x){return x.trim()}).filter(Boolean):t.value;
+    var vv=dtp==='stage'?(t.checked?'order':''):dtp==='bool'?t.checked:dtp==='num'?(Number(t.value)||0):dtp==='list'?t.value.split(',').map(function(x){return x.trim()}).filter(Boolean):t.value;
     setPath(ST.pdraft,t.dataset.dp,vv);return}
+  if(t.dataset.cin!==undefined){var cp=t.dataset.cin.split('|');var cc=ST.cart.find(function(c){return c.lid===cp[0]});if(cc){cc.inputs=cc.inputs||{};cc.inputs[cp[1]]=t.value;saveCart()}return}
   if(t.dataset.in!==undefined){if(!ST.sel)return;ST.sel.inputs[t.dataset.in]=t.type==='checkbox'?(t.checked?'Y':''):t.value;updItem();return}
   if(t.dataset.note!==undefined){var l=ST.cart.find(function(c){return c.pid===t.dataset.note});if(l){l.note=t.value;saveCart();var cn=document.getElementById('cnt-'+t.dataset.note);if(cn)cn.textContent='입력 '+noteCount(t.value)+' / 수량 '+l.qty}}
   else if(t.dataset.form){ST.form[t.dataset.form]=t.type==='checkbox'?t.checked:t.value}
@@ -906,6 +943,7 @@ app.addEventListener('input',function(e){var t=e.target;
 app.addEventListener('change',function(e){var t=e.target;
   if(t.dataset.opt!==undefined){if(!ST.sel)return;ST.sel.opts[t.dataset.opt]=t.value;updItem();return}
   if(t.dataset.up!==undefined){onUpload(t);return}
+  if(t.dataset.cup!==undefined){onCartUpload(t);return}
   if(t.dataset.rr&&t.dataset.dp!==undefined){render();return}
   if(t.dataset.form==='pay'){ST.form.pay=t.value;render()}
   else if(t.dataset.sort!==undefined){ST.sort=t.value;render()}
@@ -925,6 +963,7 @@ async function boot(){
   var er=function(){};
   db.collection('products').onSnapshot(function(s){ST.products=snapList(s).map(function(x){x.id=x._id;return x});refresh()},er);
   db.collection('notices').onSnapshot(function(s){ST.notices=snapList(s).sort(byAtDesc).map(function(x){x.id=x._id;return x});refresh()},er);
+  db.collection('likes').onSnapshot(function(s){ST.likes=snapList(s);refresh()},er);
   db.collection('reviews').onSnapshot(function(s){ST.reviews=snapList(s);refresh()},er);
   db.collection('pqa').onSnapshot(function(s){ST.pqa=snapList(s);refresh()},er);
   db.collection('qreplies').onSnapshot(function(s){var m={};s.docs.forEach(function(d){m[d.id]=d.data()});ST.qrep=m;refresh()},er);
