@@ -10,6 +10,7 @@
 | `css/style.css` | 모든 스타일 |
 | `js/config.js` | Supabase 주소와 공개 키 |
 | `js/util.js`, `constants.js`, `state.js` | 공통 도구, 상수와 기본 상품, 앱 상태 |
+| `js/product-art.js` | 기본 상품 대표 이미지(직접 그린 SVG) |
 | `js/supabase.js` | Supabase 연결 (테이블 읽기/쓰기, 파일 업로드) |
 | `js/cart-helpers.js` | 옵션, 입력 항목, 금액 계산과 검증 |
 | `js/pages-shop.js` | 홈, 서비스, 장바구니, 상품 상세, 결제창 화면 |

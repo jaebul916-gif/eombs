@@ -20,12 +20,12 @@ var REG_DETAIL=[
  {t:'p',text:'옵션없음 (+0원)\n도착한 상품을 완충재로 감싸 그대로 발송합니다.\n\n박스교체 (+300원)\n상품에 맞는 박스로 바꿔 다시 포장해 발송합니다.\n\n화장품사은품추가 (+300원)\n샘플 화장품을 무작위로 함께 넣어 보냅니다.\n\n맥심모카골드추가 (+300원)\n커피 스틱을 함께 넣어 보냅니다.\n\n마스크팩추가 (+500원)\n마스크팩을 함께 넣어 보냅니다.\n\n이니스프리마스크팩 (+1,000원)\n해당 브랜드 마스크팩을 함께 넣어 보냅니다.\n\n대형포장 (+500원)\n가로+세로+높이 합이 1m 이상인 상품일 때 선택해 주세요.'},
  {t:'note',text:'옵션이 필요 없으면 옵션없음을 선택해 주세요. 입력 후 구매하기를 누르면 추가 정보 입력(송장 업로드)과 결제 단계로 이동합니다.'}];
 var DEFAULTS=[
- {id:'s-shopee',cat:'shopee',type:'register',name:'쇼피 배송등록',desc:'쇼피 주문번호를 입력하면 한 건씩 배송을 접수합니다.',price:2000,sale:1900,unit:'건',best:true,soldout:false,order:1,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
- {id:'s-shopee-bundle',cat:'shopee',type:'register',name:'쇼피 합배송등록',desc:'같은 구매자의 여러 주문을 한 상자로 묶어 접수합니다.',price:2500,sale:2200,unit:'건',best:false,soldout:false,order:2,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
- {id:'s-qoo10',cat:'qoo10',type:'register',name:'큐텐(KSE) 배송등록',desc:'큐텐 주문번호를 입력해 한 건씩 배송을 접수합니다.',price:2000,sale:1900,unit:'건',best:true,soldout:false,order:3,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
- {id:'s-qoo10-bundle',cat:'qoo10',type:'register',name:'큐텐(KSE) 합배송등록',desc:'같은 구매자의 큐텐 주문을 한 상자로 묶어 접수합니다.',price:2500,sale:2200,unit:'건',best:false,soldout:false,order:4,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
- {id:'s-domestic',cat:'etc',type:'domestic',name:'국내 택배 서비스',desc:'국내 구간 택배 발송을 대행합니다. 보내는 곳과 받는 곳을 남겨 주세요.',price:3000,sale:0,unit:'건',best:false,soldout:false,order:5},
- {id:'s-storage',cat:'etc',type:'storage',name:'물품 보관 서비스',desc:'입고된 물품을 보관합니다. 품목과 기간을 요청 메모에 적어 주세요.',price:30000,sale:20000,unit:'건',best:false,soldout:false,order:6},
- {id:'s-credit',cat:'etc',type:'credit',name:'적립금 충전',desc:'적립금을 충전해 다음 주문부터 결제에 사용합니다.',price:10000,sale:0,credit:10000,unit:'회',best:true,soldout:false,order:7},
- {id:'s-label',cat:'shopee',type:'goods',name:'쇼피 송장 라벨지 100×100 (500매)',desc:'바코드 프린터용 감열 라벨지입니다. 배송지가 필요합니다.',price:10000,sale:7500,unit:'개',best:false,soldout:false,order:8}
+ {id:'s-shopee',images:['img-s-shopee'],cat:'shopee',type:'register',name:'쇼피 배송등록',desc:'쇼피 주문번호를 입력하면 한 건씩 배송을 접수합니다.',price:2000,sale:1900,unit:'건',best:true,soldout:false,order:1,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
+ {id:'s-shopee-bundle',images:['img-s-shopee-bundle'],cat:'shopee',type:'register',name:'쇼피 합배송등록',desc:'같은 구매자의 여러 주문을 한 상자로 묶어 접수합니다.',price:2500,sale:2200,unit:'건',best:false,soldout:false,order:2,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
+ {id:'s-qoo10',images:['img-s-qoo10'],cat:'qoo10',type:'register',name:'큐텐(KSE) 배송등록',desc:'큐텐 주문번호를 입력해 한 건씩 배송을 접수합니다.',price:2000,sale:1900,unit:'건',best:true,soldout:false,order:3,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
+ {id:'s-qoo10-bundle',images:['img-s-qoo10-bundle'],cat:'qoo10',type:'register',name:'큐텐(KSE) 합배송등록',desc:'같은 구매자의 큐텐 주문을 한 상자로 묶어 접수합니다.',price:2500,sale:2200,unit:'건',best:false,soldout:false,order:4,pointRate:1,hideQty:true,options:REG_OPTS,fields:REG_FIELDS,detail:REG_DETAIL},
+ {id:'s-domestic',images:['img-s-domestic'],cat:'etc',type:'domestic',name:'국내 택배 서비스',desc:'국내 구간 택배 발송을 대행합니다. 보내는 곳과 받는 곳을 남겨 주세요.',price:3000,sale:0,unit:'건',best:false,soldout:false,order:5},
+ {id:'s-storage',images:['img-s-storage'],cat:'etc',type:'storage',name:'물품 보관 서비스',desc:'입고된 물품을 보관합니다. 품목과 기간을 요청 메모에 적어 주세요.',price:30000,sale:20000,unit:'건',best:false,soldout:false,order:6},
+ {id:'s-credit',images:['img-s-credit'],cat:'etc',type:'credit',name:'적립금 충전',desc:'적립금을 충전해 다음 주문부터 결제에 사용합니다.',price:10000,sale:0,credit:10000,unit:'회',best:true,soldout:false,order:7},
+ {id:'s-label',images:['img-s-label'],cat:'shopee',type:'goods',name:'쇼피 송장 라벨지 100×100 (500매)',desc:'바코드 프린터용 감열 라벨지입니다. 배송지가 필요합니다.',price:10000,sale:7500,unit:'개',best:false,soldout:false,order:8}
 ];

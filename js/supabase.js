@@ -2,7 +2,7 @@
 "use strict";
 /* ---------- Supabase (GitHub Pages 등 Claude 저장소가 없을 때) ---------- */
 var SB=null;
-function blobUrl(id){if(SB){try{return SB.storage.from('uploads').getPublicUrl(id).data.publicUrl}catch(e){}}return '/_blob/'+id}
+function blobUrl(id){if(/^img-/.test(id))return artUrl(id);if(SB){try{return SB.storage.from('uploads').getPublicUrl(id).data.publicUrl}catch(e){}}return '/_blob/'+id}
 function sbRnd(n){var a=new Uint8Array(n);crypto.getRandomValues(a);return Array.from(a).map(function(x){return x.toString(16).padStart(2,'0')}).join('')}
 function sbDeep(a,b){if(b===null||typeof b!=='object'||Array.isArray(b))return b;var o=Object.assign({},(a&&typeof a==='object'&&!Array.isArray(a))?a:{});Object.keys(b).forEach(function(k){o[k]=sbDeep(o[k],b[k])});return o}
 function sbMakeDb(sb){
