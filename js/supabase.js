@@ -5,6 +5,15 @@ var SB=null;
 function blobUrl(id){if(/^img-/.test(id))return artUrl(id);if(SB){try{return SB.storage.from('uploads').getPublicUrl(id).data.publicUrl}catch(e){}}return '/_blob/'+id}
 function sbRnd(n){var a=new Uint8Array(n);crypto.getRandomValues(a);return Array.from(a).map(function(x){return x.toString(16).padStart(2,'0')}).join('')}
 function sbDeep(a,b){if(b===null||typeof b!=='object'||Array.isArray(b))return b;var o=Object.assign({},(a&&typeof a==='object'&&!Array.isArray(a))?a:{});Object.keys(b).forEach(function(k){o[k]=sbDeep(o[k],b[k])});return o}
+/* DB 에 대표 이미지/상세 이미지가 비어 있는 기본 상품은 코드에 들어 있는 기본 일러스트로 채웁니다. (seed.sql 을 다시 실행하지 않아도 보이도록) */
+function withDefaultArt(id,d){
+  var df=null;for(var i=0;i<DEFAULTS.length;i++)if(DEFAULTS[i].id===id){df=DEFAULTS[i];break}
+  if(!df)return d;
+  if(!d.images||!d.images.length)d.images=(df.images||[]).slice();
+  var hasImg=(d.detail||[]).some(function(b){return b.t==='img'&&b.img});
+  if(!hasImg&&df.detail&&df.detail.length)d.detail=JSON.parse(JSON.stringify(df.detail));
+  return d;
+}
 function sbMakeDb(sb){
   var nrt=0;var PM={byId:{},byLogin:{}};
   function ck(r){if(r&&r.error)throw r.error;return r.data}
@@ -31,7 +40,7 @@ function sbMakeDb(sb){
           options:srt(op[p.id],'pos').map(function(o){return {id:o.id,name:o.name,required:o.required,placeholder:o.placeholder,choices:srt(cm[p.id+'|'+o.id],'pos').map(function(c){return {label:c.label,add:c.add_price}})}}),
           detail:srt(dt[p.id],'pos').map(function(b){var x={t:b.kind,text:b.body};if(b.file_id)x.img=b.file_id;return x})};
           if(p.custom_fields)d.fields=srt(fl[p.id],'pos').map(function(f){var x={id:f.id,label:f.label,type:f.type,required:f.required,unique:f.unique_val,matchQty:f.match_qty,placeholder:f.placeholder,help:f.help};if(f.stage)x.stage=f.stage;if(f.choices&&f.choices.length)x.options=f.choices;return x});
-          return [p.id,d]})},
+          return [p.id,withDefaultArt(p.id,d)]})},
       set:async function(id,d){var o=Object.assign({},d,{id:id});ck(await sb.rpc('admin_save_product',{p:o}))},
       del:async function(id){ck(await sb.from('products').delete().eq('id',id))}},
     notices:{t:['notices'],
