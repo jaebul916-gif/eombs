@@ -27,3 +27,11 @@ update public.profiles set role = 'admin' where login_id = '여기에_아이디'
 | 설정 | site_settings |
 
 주문 접수, 입금 확인, 취소/환불, 적립금 조정, 상품 저장은 서버 함수(`place_order`, `admin_update_order`, `admin_wallet_adjust`, `admin_save_product`, `request_cancel`, `confirm_toss_payment`)로만 처리되고, 금액은 서버에서 다시 계산합니다.
+
+## 카카오 로그인
+
+1. Supabase → Authentication → Providers → Kakao 활성화 (REST API 키 / Client Secret), Site URL 과 Redirect URLs 에 배포 주소 등록
+2. 카카오 디벨로퍼스 → 카카오 로그인 Redirect URI 에 `https://<프로젝트>.supabase.co/auth/v1/callback` 등록, 동의항목은 닉네임(이메일은 선택)
+3. SQL Editor 에서 `supabase/kakao-login.sql` 을 한 번 실행 — 카카오 첫 로그인 시 `profiles` 가 자동 생성됩니다 (login_id `kk…`, 닉네임이 없으면 "카카오회원")
+
+프런트는 PKCE 방식(`?code=`)으로 돌아오며, 카카오 회원은 마이페이지에 비밀번호 변경 대신 안내가 표시됩니다.

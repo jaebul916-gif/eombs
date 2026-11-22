@@ -6,7 +6,7 @@ async function boot(){
   setTimeout(function(){if(!ST.ready){ST.ready=true;route()}},6000);
   var cl=window.claude;
   if((!cl||!cl.use)&&window.SB_CFG&&window.supabase&&window.supabase.createClient){
-    SB=window.supabase.createClient(window.SB_CFG.url,window.SB_CFG.key);ST.db=sbMakeDb(SB);ST.write=true}
+    SB=window.supabase.createClient(window.SB_CFG.url,window.SB_CFG.key,{auth:{flowType:'pkce'}});ST.db=sbMakeDb(SB);ST.write=true}
   else if(!cl||!cl.use){ST.ready=true;route();return}
   else{
     try{var u=await cl.use('user');if(u)ST.write=await u.can('data.write')}catch(e){}
@@ -22,10 +22,20 @@ async function boot(){
   db.collection('qreplies').onSnapshot(function(s){var m={};s.docs.forEach(function(d){m[d.id]=d.data()});ST.qrep=m;refresh()},er);
   db.doc('settings/site').onSnapshot(function(s){ST.settings=s.exists?s.data():{};refresh()},er);
   var sid=null;
-  if(SB){try{var gs=await SB.auth.getSession();var em=gs.data&&gs.data.session&&gs.data.session.user&&gs.data.session.user.email;if(em)sid=em.split('@')[0]}catch(e){}}
+  var kk=null,sso=false;try{kk=sessionStorage.getItem('sp-kakao')}catch(e){}
+  if(kk){var qs=new URLSearchParams(location.search);
+    if(qs.get('error')||qs.get('error_description')){toast('카카오 로그인이 취소되었거나 실패했습니다');try{sessionStorage.removeItem('sp-kakao')}catch(e){}kk=null}
+    ['code','state','error','error_code','error_description'].forEach(function(k){qs.delete(k)});
+    try{var qq=qs.toString();history.replaceState(null,'',location.pathname+(qq?'?'+qq:'')+location.hash)}catch(e){}}
+  if(SB){try{var gs=await SB.auth.getSession();var us=gs.data&&gs.data.session&&gs.data.session.user;
+    if(us){var em=us.email||'';
+      if(/@sellerport\.app$/.test(em))sid=em.split('@')[0];
+      else{sso=true;sid=await sbProfileLogin(us.id);if(!sid){try{SB.auth.signOut()}catch(e){}toast('카카오 계정 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요')}}}}catch(e){}}
   else{try{sid=localStorage.getItem('sp-sess')}catch(e){}}
-  if(sid){try{var a=await db.doc('accounts/'+sid).get();if(a.exists)setAcct(sid,a.data());else setAcct(null)}catch(e){}}
+  if(sid){try{var a=await db.doc('accounts/'+sid).get();if(a.exists){setAcct(sid,a.data());if(sso)ST.acct.sso=true}else setAcct(null)}catch(e){}}
   ST.ready=true;route();
+  if(kk){try{sessionStorage.removeItem('sp-kakao')}catch(e){}
+    if(ST.acct){try{ST.next=JSON.parse(kk).next||''}catch(e){}toast(ST.acct.name+'님, 환영합니다');afterAuth()}}
   try{tossReturn()}catch(e){}
 }
 boot();
