@@ -335,7 +335,7 @@ create policy likes_del on public.product_likes for delete to authenticated usin
 create or replace function public.profiles_guard() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  if tg_op = 'UPDATE' and not public.is_admin() then
+  if tg_op = 'UPDATE' and auth.uid() is not null and not public.is_admin() then
     if new.id <> old.id or new.login_id <> old.login_id or new.role <> old.role then
       raise exception 'not allowed';
     end if;

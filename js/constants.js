@@ -29,3 +29,24 @@ var DEFAULTS=[
  {id:'s-credit',images:['img-s-credit'],cat:'etc',type:'credit',name:'적립금 충전',desc:'적립금을 충전해 다음 주문부터 결제에 사용합니다.',price:10000,sale:0,credit:10000,unit:'회',best:true,soldout:false,order:7},
  {id:'s-label',images:['img-s-label'],cat:'shopee',type:'goods',name:'쇼피 송장 라벨지 100×100 (500매)',desc:'바코드 프린터용 감열 라벨지입니다. 배송지가 필요합니다.',price:10000,sale:7500,unit:'개',best:false,soldout:false,order:8}
 ];
+
+/* 상세 페이지 본문 (이미지 + 설명). 관리자 화면의 상품 편집에서 직접 바꿀 수 있습니다. */
+function regDetail(scene,market,bundle){
+  var d=[{t:'img',img:'img-d-'+scene},
+   {t:'h',text:market+' '+(bundle?'합배송등록':'배송등록')+', 이렇게 접수돼요'},
+   {t:'p',text:bundle?'같은 구매자가 여러 상품을 주문했다면 한 상자로 묶어 보낼 수 있어요. 주문번호를 한 줄에 하나씩 적으면 합배송으로 접수됩니다.':'주문번호만 적어 보내면 배송등록을 대신 접수해요. 송장 파일(PDF)을 올리고 결제하면 접수가 시작됩니다.'}];
+  if(bundle)d.push({t:'img',img:'img-d-bundle'});
+  d.push({t:'img',img:'img-d-flow'});
+  return d.concat(REG_DETAIL.slice(0,3)).concat([{t:'img',img:'img-d-packing'}]).concat(REG_DETAIL.slice(3));
+}
+var DETAILS={
+ 's-shopee':regDetail('route-shopee','쇼피',false),
+ 's-shopee-bundle':regDetail('route-shopee','쇼피',true),
+ 's-qoo10':regDetail('route-qoo10','큐텐(KSE)',false),
+ 's-qoo10-bundle':regDetail('route-qoo10','큐텐(KSE)',true),
+ 's-domestic':[{t:'img',img:'img-d-truck'},{t:'h',text:'국내 택배 발송 대행'},{t:'p',text:'보내는 곳과 받는 곳, 물품 정보를 남겨 주시면 국내 구간 택배 발송을 대신 처리해 드려요.'},{t:'note',text:'택배 정보 칸에 보내는 곳, 받는 곳, 물품을 함께 적어 주세요.'}],
+ 's-storage':[{t:'img',img:'img-d-warehouse'},{t:'h',text:'물품 보관 서비스'},{t:'p',text:'입고된 물품을 정해진 기간 동안 안전하게 보관합니다. 품목과 기간을 요청 메모에 적어 주세요.'},{t:'note',text:'보관 기간이 끝나면 안내 후 발송하거나 폐기 여부를 확인합니다.'}],
+ 's-credit':[{t:'img',img:'img-d-wallet'},{t:'h',text:'적립금 충전'},{t:'p',text:'적립금을 미리 충전해 두면 다음 주문부터 결제에 바로 사용할 수 있어요. 입금이 확인되면 충전됩니다.'}],
+ 's-label':[{t:'img',img:'img-d-label'},{t:'h',text:'쇼피 송장 라벨지'},{t:'p',text:'바코드 프린터용 감열 라벨지(100×100mm, 500매)입니다. 물품을 받을 배송지 주소가 필요합니다.'}]
+};
+DEFAULTS.forEach(function(p){if(DETAILS[p.id])p.detail=DETAILS[p.id]});

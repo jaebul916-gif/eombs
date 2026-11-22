@@ -15,7 +15,6 @@ document.addEventListener('click',async function(e){
   else if(a==='copy'){try{await navigator.clipboard.writeText(t.dataset.v);toast('복사했습니다')}catch(e2){toast('복사하지 못했습니다. 직접 선택해 복사해 주세요.')}}
   else if(a==='of'){ST.ofilter=t.dataset.v;render()}
   else if(a==='ltab'){ST.ltab=t.dataset.v;ST.lerr='';render()}
-  else if(a==='fill'){ST.ltab='in';ST.lerr='';render();document.getElementById('lgId').value=t.dataset.id;document.getElementById('lgPw').value=t.dataset.pw}
   else if(a==='login'){if(!ST.busy)await doLogin()}
   else if(a==='signup'){if(!ST.busy)await doSignup()}
   else if(a==='logout'){ST.form={pay:'bank',name:'',phone:'',dep:'',addr:'',agree:false,pts:0};ST.cart=[];ST.sel=null;ST.only='';saveCart();if(SB){try{SB.auth.signOut()}catch(e){}}setAcct(null);toast('로그아웃했습니다');location.hash='#home'}

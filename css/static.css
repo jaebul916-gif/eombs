@@ -1,0 +1,41 @@
+/* 정적 SEO 페이지(쇼피/큐텐/요금표/FAQ) 전용 스타일. 색상은 style.css 의 토큰을 씁니다. */
+.prose{padding-block:2rem 3rem;max-width:52rem}
+.prose h1{font-size:clamp(1.9rem,5vw,2.9rem);font-weight:700;letter-spacing:-.03em;line-height:1.15;margin-bottom:.9rem}
+.prose h2{font-size:clamp(1.35rem,3vw,1.8rem);font-weight:600;letter-spacing:-.025em;margin:2.4rem 0 .8rem}
+.prose h3{font-size:1.05rem;font-weight:600}
+.prose p,.prose li{max-width:65ch}
+.prose p{margin-block:.6rem}
+.prose ul{padding-left:1.2rem;display:grid;gap:.35rem}
+.prose .lead{font-size:clamp(1.05rem,2.4vw,1.25rem);color:var(--muted);margin-bottom:1rem}
+.crumbs{font-size:.88rem;color:var(--muted);margin-bottom:1rem}
+.crumbs a{color:var(--muted)}
+.cta{display:flex;flex-wrap:wrap;gap:.7rem;margin-block:1.2rem}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;margin-block:.8rem}
+.prose table{width:100%;border-collapse:collapse;min-width:30rem}
+.prose th,.prose td{padding:.85rem 1rem;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.prose tbody tr:last-child th,.prose tbody tr:last-child td{border-bottom:0}
+.prose thead th{background:var(--tile);font-size:.85rem;color:var(--muted);font-weight:600}
+.prose tbody th{font-weight:600}
+.prose tbody th .small{display:block;font-weight:400;margin-top:.15rem}
+.prose td s{color:var(--muted);font-size:.85rem}
+.prose .steps{padding-left:0;list-style:none;display:grid;gap:.8rem;counter-reset:s;margin-block:.8rem}
+.prose .steps li{counter-increment:s;background:var(--tile);border-radius:18px;padding:1rem 1.2rem 1rem 3.6rem;position:relative}
+.prose .steps li::before{content:counter(s);position:absolute;left:1.1rem;top:1rem;width:1.7rem;height:1.7rem;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-size:.9rem}
+.prose .rel{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:.6rem}
+.prose .rel a{display:inline-block;background:var(--tile);border-radius:980px;padding:.5rem 1rem;color:var(--ink)}
+.prose .rel a:hover{background:var(--accent-soft);text-decoration:none}
+.faq{display:grid;gap:.6rem}
+.faq details{background:var(--tile);border-radius:18px;padding:1rem 1.2rem}
+.faq summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:1rem}
+.faq summary::after{content:"+";color:var(--muted);font-size:1.3rem;line-height:1}
+.faq details[open] summary::after{content:"−"}
+.faq summary::-webkit-details-marker{display:none}
+.faq details p{color:var(--muted);margin-top:.6rem}
+.demonote2{background:var(--accent-soft);color:var(--ink);border-radius:14px;padding:.8rem 1rem;font-size:.92rem}
+.foot .flinks,.foot .demonote{display:block;margin-top:.4rem}
+.foot .demonote{color:var(--muted);font-size:.82rem}
+/* 홈 프리렌더 섹션 */
+.seohome{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-block:2rem}
+.seohome article{background:var(--tile);border-radius:28px;padding:1.6rem;display:grid;gap:.5rem;align-content:start}
+.seohome h2{font-size:1.25rem;font-weight:600;letter-spacing:-.02em}
+@media (max-width:760px){.seohome{grid-template-columns:minmax(0,1fr)}.prose th,.prose td{padding:.7rem .75rem}}
