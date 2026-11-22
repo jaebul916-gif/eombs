@@ -216,3 +216,11 @@ details .body{margin-top:.6rem;white-space:pre-wrap;color:var(--muted)}
 .mbox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:31;background:var(--tile);border-radius:22px;padding:1.6rem;width:min(92vw,24rem);display:grid;gap:1.1rem;box-shadow:0 10px 40px rgba(0,0,0,.35)}
 @media (max-width:760px){.itemtop{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* 카카오 로그인 */
+.kakao-btn{display:flex;align-items:center;justify-content:center;gap:.55rem;width:100%;min-height:3rem;border:0;border-radius:14px;background:#FEE500;color:#191919;font:inherit;font-weight:700;font-size:1rem;cursor:pointer;transition:filter .15s,transform .15s}
+.kakao-btn:hover{filter:brightness(.96)}
+.kakao-btn:active{transform:scale(.99)}
+.kakao-btn:focus-visible{outline:3px solid #191919;outline-offset:2px}
+.or{display:flex;align-items:center;gap:.8rem;color:var(--muted,#888);font-size:.8rem}
+.or::before,.or::after{content:"";flex:1;height:1px;background:currentColor;opacity:.25}

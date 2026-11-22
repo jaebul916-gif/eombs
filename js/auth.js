@@ -55,6 +55,13 @@ async function doLogin(){
     setAcct(id,s.data());toast(ST.acct.name+'님, 환영합니다');afterAuth();
   }catch(e){ST.busy=false;ST.lerr='로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.';render()}
 }
+async function doKakao(){
+  if(!SB){toast('카카오 로그인은 배포된 사이트(Supabase 연결)에서만 사용할 수 있습니다');return}
+  if(ST.busy)return;
+  try{sessionStorage.setItem('sp-kakao',JSON.stringify({next:ST.next&&ST.next!=='#login'?ST.next:''}))}catch(e){}
+  var r=await SB.auth.signInWithOAuth({provider:'kakao',options:{redirectTo:kakaoRedirect()}});
+  if(r.error){try{sessionStorage.removeItem('sp-kakao')}catch(e){}ST.lerr='카카오 로그인을 시작하지 못했습니다. '+r.error.message;render()}
+}
 async function doSignup(){
   var g=function(i){return document.getElementById(i).value.trim()};
   var id=g('suId').toLowerCase(),name=g('suName'),phone=g('suPhone'),pw=document.getElementById('suPw').value,pw2=document.getElementById('suPw2').value;

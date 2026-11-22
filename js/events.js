@@ -17,6 +17,7 @@ document.addEventListener('click',async function(e){
   else if(a==='ltab'){ST.ltab=t.dataset.v;ST.lerr='';render()}
   else if(a==='login'){if(!ST.busy)await doLogin()}
   else if(a==='signup'){if(!ST.busy)await doSignup()}
+  else if(a==='kakao'){await doKakao()}
   else if(a==='logout'){ST.form={pay:'bank',name:'',phone:'',dep:'',addr:'',agree:false,pts:0};ST.cart=[];ST.sel=null;ST.only='';saveCart();if(SB){try{SB.auth.signOut()}catch(e){}}setAcct(null);toast('로그아웃했습니다');location.hash='#home'}
   else if(a==='me-save'){var nm=document.getElementById('meName').value.trim(),ph=document.getElementById('mePhone').value.trim();if(!nm||!ph){toast('이름과 연락처를 입력해 주세요');return}
     await ST.db.doc('accounts/'+ST.acct.id).update({name:nm,phone:ph});ST.acct.name=nm;ST.acct.phone=ph;toast('내 정보를 저장했습니다');render()}

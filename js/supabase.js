@@ -120,3 +120,13 @@ function sbMakeDb(sb){
 var sbAssetsObj={upload:async function(file){var id='u'+sbRnd(12);var r=await SB.storage.from('uploads').upload(id,file,{contentType:file.type||'application/octet-stream'});if(r.error)throw r.error;return {id:id}}};
 function getAssets(){if(SB)return Promise.resolve(sbAssetsObj);return (window.claude&&window.claude.use)?window.claude.use('assets'):Promise.resolve(null)}
 function sbEmail(id){return id+'@sellerport.app'}
+/* 카카오 로그인: 돌아올 주소(GitHub Pages 는 /eombs/, 로컬·커스텀 도메인은 /) 와 프로필 조회 */
+function kakaoRedirect(){return location.origin+(location.pathname.indexOf('/eombs/')===0?'/eombs/':'/')}
+async function sbProfileLogin(uid){
+  for(var i=0;i<3;i++){
+    var r=await SB.from('profiles').select('login_id').eq('id',uid).maybeSingle();
+    if(r.data&&r.data.login_id)return r.data.login_id;
+    await new Promise(function(f){setTimeout(f,400)});
+  }
+  return null;
+}
