@@ -66,7 +66,7 @@ const FOOT = `<span>쇼피·큐텐 셀러를 위한 배송대행 서비스입니
 function shell({ meta, body, current }) {
   const links = NAV.map(([h, t]) => `<a href="${BASE}${h}"${h === current ? ' aria-current="page"' : ''}>${t}</a>`).join('\n    ');
   return `<!doctype html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
 ${meta}
 <link rel="preconnect" href="https://fonts.googleapis.com">
