@@ -26,4 +26,4 @@ update public.profiles set role = 'admin' where login_id = '여기에_아이디'
 | 게시판 | notices, inquiries, inquiry_replies, reviews, product_qna, product_qna_replies, product_likes |
 | 설정 | site_settings |
 
-주문 접수, 입금 확인, 취소/환불, 적립금 조정, 상품 저장은 서버 함수(`place_order`, `admin_update_order`, `admin_wallet_adjust`, `admin_save_product`, `request_cancel`)로만 처리되고, 금액은 서버에서 다시 계산합니다.
+주문 접수, 입금 확인, 취소/환불, 적립금 조정, 상품 저장은 서버 함수(`place_order`, `admin_update_order`, `admin_wallet_adjust`, `admin_save_product`, `request_cancel`, `confirm_toss_payment`)로만 처리되고, 금액은 서버에서 다시 계산합니다.

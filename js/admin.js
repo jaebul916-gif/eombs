@@ -27,7 +27,7 @@ function pageAdmin(){
        var items=o.items.map(function(i){return '<li>'+esc(i.name)+' × '+i.qty+itemDetail(i)+'</li>'}).join('');
        return '<article class="card ord" data-uid="'+esc(o.uid)+'" data-oid="'+esc(o.id)+'" data-hay="'+esc(hay)+'"><div class="ord-head"><div><strong class="num">'+esc(o.no)+'</strong> <span class="muted small">'+dt(o.createdAt)+' · '+esc(o.uid)+'</span></div><div class="row">'+(o.cancelRequested&&o.status!=='canceled'?'<span class="chip warn">취소 요청</span>':'')+chip(o.status)+'</div></div>'
         +'<div class="small">'+esc(o.contact&&o.contact.name)+' · <span class="num">'+esc(o.contact&&o.contact.phone)+'</span>'+(o.contact&&o.contact.addr?'<br>'+esc(o.contact.addr):'')+'</div>'
-        +'<ul>'+items+'</ul><div class="row" style="justify-content:space-between"><span class="small muted">'+(o.pay==='points'?'적립금 결제':'무통장입금 · '+esc(o.depositor||''))+'</span><strong class="num">'+won(o.total)+'</strong></div>'
+        +'<ul>'+items+'</ul><div class="row" style="justify-content:space-between"><span class="small muted">'+(o.pay==='points'?'적립금 결제':o.pay==='card'?'토스페이먼츠(테스트 결제)':'무통장입금 · '+esc(o.depositor||''))+'</span><strong class="num">'+won(o.total)+'</strong></div>'
         +'<div class="fgrid"><label>상태<select data-f="status">'+so+'</select></label><label>관리자 메모<input data-f="memo" value="'+esc(o.memo)+'"></label></div>'
         +'<div class="row"><button class="btn sm" data-act="a-save">저장</button>'+(o.status==='pending'?'<button class="btn ghost sm" data-act="a-pay">결제 확인</button>':'')+((o.status==='paid'||o.status==='working')&&!hasCredit?'<button class="btn danger sm" data-act="a-refund">취소·적립금 환불</button>':'')+'</div></article>'}).join('')
      +(os.length?'':'<p class="muted">해당하는 주문이 없습니다.</p>');
