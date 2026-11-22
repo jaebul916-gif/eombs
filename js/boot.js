@@ -23,15 +23,17 @@ async function boot(){
   db.doc('settings/site').onSnapshot(function(s){ST.settings=s.exists?s.data():{};refresh()},er);
   var sid=null;
   var kk=null,sso=false;try{kk=sessionStorage.getItem('sp-kakao')}catch(e){}
-  if(kk){var qs=new URLSearchParams(location.search);
-    if(qs.get('error')||qs.get('error_description')){toast('카카오 로그인이 취소되었거나 실패했습니다');try{sessionStorage.removeItem('sp-kakao')}catch(e){}kk=null}
-    ['code','state','error','error_code','error_description'].forEach(function(k){qs.delete(k)});
-    try{var qq=qs.toString();history.replaceState(null,'',location.pathname+(qq?'?'+qq:'')+location.hash)}catch(e){}}
+  var qs=new URLSearchParams(location.search);
+  var oauthErr=qs.get('error')||qs.get('error_description');
   if(SB){try{var gs=await SB.auth.getSession();var us=gs.data&&gs.data.session&&gs.data.session.user;
     if(us){var em=us.email||'';
       if(/@sellerport\.app$/.test(em))sid=em.split('@')[0];
       else{sso=true;sid=await sbProfileLogin(us.id);if(!sid){try{SB.auth.signOut()}catch(e){}toast('카카오 계정 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요')}}}}catch(e){}}
   else{try{sid=localStorage.getItem('sp-sess')}catch(e){}}
+  if(kk||oauthErr||qs.has('code')){
+    if(oauthErr){toast('카카오 로그인이 취소되었거나 실패했습니다');try{sessionStorage.removeItem('sp-kakao')}catch(e){}kk=null}
+    ['code','state','error','error_code','error_description'].forEach(function(k){qs.delete(k)});
+    try{var qq=qs.toString();history.replaceState(null,'',location.pathname+(qq?'?'+qq:'')+location.hash)}catch(e){}}
   if(sid){try{var a=await db.doc('accounts/'+sid).get();if(a.exists){setAcct(sid,a.data());if(sso)ST.acct.sso=true}else setAcct(null)}catch(e){}}
   ST.ready=true;route();
   if(kk){try{sessionStorage.removeItem('sp-kakao')}catch(e){}
