@@ -39,16 +39,26 @@ async function placeOrder(){
   if(!f.agree){ST.err='확인 항목에 체크해 주세요.';return render()}
   var total=items.reduce(function(s,i){return s+i.price*i.qty},0);
   var bal0=(ST.myWallet&&ST.myWallet.balance)||0;var us0=bal0>=PTS_MIN?Math.min(bal0,total):0;var pts=Math.max(0,Math.min(us0,Math.floor(Number(f.pts)||0)));
-  f.pay=pts>=total?'points':'bank';
-  if(f.pay==='bank'&&(f.method||'bank')!=='bank'){ST.paywin={method:f.method,step:1,amount:total-pts,names:lines.map(function(l){return l.p.name}).join(', ')};render();return}
+  var method=f.method||'toss';
+  f.pay=pts>=total?'points':(method==='toss'?'card':'bank');
   var now=new Date().toISOString();
   var order={id:'o'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),no:'EB'+ymd()+'-'+Math.floor(1000+Math.random()*9000),createdAt:now,pay:f.pay,depositor:f.pay==='bank'?(f.dep.trim()||f.name.trim()):'',
     contact:{name:f.name.trim(),phone:f.phone.trim(),addr:f.addr.trim()},items:items,total:total,pts:pts};
   ST.busy=true;render();
   try{
-    if(SB){var rr0=await SB.rpc('place_order',{p:{contact:order.contact,depositor:order.depositor,pts:pts,items:lines.map(function(l){return {pid:l.p.id,qty:l.qty,opts:l.c.opts||{},inputs:l.c.inputs||{}}})}});if(rr0.error)throw rr0.error}
+    var placed=null;
+    if(SB){var rr0=await SB.rpc('place_order',{p:{contact:order.contact,depositor:order.depositor,pts:pts,pay:f.pay,items:lines.map(function(l){return {pid:l.p.id,qty:l.qty,opts:l.c.opts||{},inputs:l.c.inputs||{}}})}});if(rr0.error)throw rr0.error;placed=rr0.data}
     else{var list=((ST.myDoc&&ST.myDoc.list)||[]).slice();list.unshift(order);
     await ST.db.doc('orders/'+ST.acct.id).set({uid:ST.acct.id,name:order.contact.name,phone:order.contact.phone,last:now,list:list})}
+    if(f.pay==='card'){
+      var pend={id:(placed&&placed.id)||order.id,no:(placed&&placed.no)||order.no,
+        amount:(Number((placed&&placed.total)!=null?placed.total:total)-Number((placed&&placed.pts)!=null?placed.pts:pts)),
+        lids:lines.map(function(l){return l.c.lid})};
+      try{sessionStorage.setItem('sp-toss',JSON.stringify(pend))}catch(e){}
+      ST.busy=false;
+      await tossRequest(pend,lines);
+      return;
+    }
     var done={};lines.forEach(function(l){done[l.c.lid]=1});
     ST.cart=ST.cart.filter(function(c){return !done[c.lid]});ST.only='';saveCart();ST.form.agree=false;ST.form.pts=0;ST.busy=false;
     toast('주문이 접수되었습니다');location.hash='#mypage';

@@ -91,7 +91,8 @@ create table if not exists public.orders (
   id text primary key,
   no text not null unique,
   user_id uuid not null references public.profiles(id),
-  pay text not null check (pay in ('bank','points')),
+  pay text not null check (pay in ('bank','points','card')),
+  payment_key text not null default '',
   depositor text not null default '',
   contact_name text not null,
   contact_phone text not null,
@@ -105,6 +106,11 @@ create table if not exists public.orders (
   created_at timestamptz not null default now()
 );
 create index if not exists orders_user_idx on public.orders (user_id, created_at desc);
+
+-- 결제수단 확장(토스페이먼츠 테스트 결제). 이미 만들어진 DB 에도 적용됩니다.
+alter table public.orders add column if not exists payment_key text not null default '';
+alter table public.orders drop constraint if exists orders_pay_check;
+alter table public.orders add constraint orders_pay_check check (pay in ('bank','points','card'));
 
 create table if not exists public.order_items (
   order_id text not null references public.orders(id) on delete cascade,
@@ -482,7 +488,8 @@ begin
   insert into public.wallets (user_id) values (v_uid) on conflict do nothing;
   select balance into v_bal from public.wallets where user_id = v_uid for update;
   if v_bal >= 1000 then v_pts := least(greatest(coalesce((p->>'pts')::integer, 0), 0), v_bal, v_total); end if;
-  v_pay := case when v_pts >= v_total then 'points' else 'bank' end;
+  v_pay := case when v_pts >= v_total then 'points'
+    else case when coalesce(p->>'pay', '') in ('bank','card') then p->>'pay' else 'bank' end end;
   v_status := case when v_pay = 'points' then 'paid' else 'pending' end;
 
   v_oid := 'o' || substr(md5(random()::text || clock_timestamp()::text), 1, 12);
@@ -503,7 +510,7 @@ begin
   end loop;
   if v_pts > 0 then perform public.wallet_add(v_uid, -v_pts, '주문 ' || v_no || ' 포인트 사용', true); end if;
   if v_status = 'paid' then perform public.apply_credit(v_oid, 1); end if;
-  return jsonb_build_object('id', v_oid, 'no', v_no, 'total', v_total, 'pay', v_pay, 'status', v_status);
+  return jsonb_build_object('id', v_oid, 'no', v_no, 'total', v_total, 'pay', v_pay, 'status', v_status, 'pts', v_pts);
 end $$;
 
 create or replace function public.request_cancel(p_order text) returns void
@@ -512,6 +519,30 @@ begin
   update public.orders set cancel_requested = true
   where id = p_order and user_id = auth.uid() and status in ('pending','paid');
   if not found then raise exception '취소를 요청할 수 없는 주문입니다'; end if;
+end $$;
+
+-- 토스페이먼츠 테스트 결제: successUrl 로 돌아온 paymentKey/amount 를 주문에 반영합니다.
+-- 시크릿 키가 없는 정적 호스팅 데모라 서버 승인 API 대신, 금액 일치 확인 후 '테스트 결제'로 확정합니다.
+create or replace function public.confirm_toss_payment(p_order text, p_key text, p_amount integer) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare o public.orders%rowtype;
+begin
+  if auth.uid() is null then raise exception '로그인이 필요합니다'; end if;
+  select * into o from public.orders where id = p_order for update;
+  if not found then raise exception '주문을 찾을 수 없습니다'; end if;
+  if o.user_id <> auth.uid() and not public.is_admin() then raise exception 'not allowed'; end if;
+  if p_amount is distinct from (o.total - o.points_used) then
+    raise exception '결제 금액이 주문 금액과 다릅니다'; end if;
+  if o.status = 'paid' then
+    return jsonb_build_object('id', o.id, 'no', o.no, 'status', o.status);
+  end if;
+  update public.orders set pay = 'card', status = 'paid', paid_at = now(),
+    payment_key = coalesce(nullif(trim(p_key), ''), payment_key),
+    memo = case when memo = '' then '테스트 결제(토스페이먼츠) · 실제 청구 없음' else memo end,
+    cancel_requested = false
+  where id = o.id;
+  perform public.apply_credit(o.id, 1);
+  return jsonb_build_object('id', o.id, 'no', o.no, 'status', 'paid');
 end $$;
 
 create or replace function public.admin_update_order(p_order text, p_status text, p_memo text) returns void
@@ -623,10 +654,11 @@ revoke all on function public._save_product(jsonb) from public, anon, authentica
 revoke all on function public.eff_fields(text) from public, anon, authenticated;
 revoke all on function public.place_order(jsonb) from public, anon;
 revoke all on function public.request_cancel(text) from public, anon;
+revoke all on function public.confirm_toss_payment(text, text, integer) from public, anon;
 revoke all on function public.admin_update_order(text, text, text) from public, anon;
 revoke all on function public.admin_wallet_adjust(text, integer, text) from public, anon;
 revoke all on function public.admin_save_product(jsonb) from public, anon;
-grant execute on function public.place_order(jsonb), public.request_cancel(text), public.admin_update_order(text, text, text),
+grant execute on function public.place_order(jsonb), public.request_cancel(text), public.confirm_toss_payment(text, text, integer), public.admin_update_order(text, text, text),
   public.admin_wallet_adjust(text, integer, text), public.admin_save_product(jsonb) to authenticated;
 grant execute on function public.is_admin(), public.has_bought(text), public.owns_inquiry(text), public.product_visible(text) to anon, authenticated;
 

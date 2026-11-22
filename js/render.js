@@ -2,6 +2,7 @@
 "use strict";
 /* ---------- render ---------- */
 function render(){
+  ST.toss=null;
   var r=ST.route;var h;
   if(!ST.ready&&(r==='cart'||r==='mypage'||r==='manage'))h='<section class="empty"><p class="muted">불러오는 중...</p></section>';
   else if(r.indexOf('item-')===0)h=pageItem(r.slice(5));else if(r==='services')h=pageServices();else if(r==='cart')h=pageCart();else if(r==='mypage')h=pageMy();else if(r==='notices')h=pageNotices();else if(r==='manage')h=pageAdmin();else if(r==='login')h=pageLogin();else if(r==='terms'||r==='privacy'||r==='refund')h=pageLegal(r);else h=pageHome();
@@ -10,6 +11,7 @@ function render(){
   document.getElementById('myLink').hidden=!ST.acct;
   var al=document.getElementById('adminLink');al.hidden=!ST.admin;var pc=ST.admin?allOrdersFlat().filter(function(o){return o.status==='pending'}).length:0;al.textContent=pc?'관리자 ('+pc+')':'관리자';
   document.getElementById('cartCount').textContent=ST.cart.reduce(function(s,c){return s+c.qty},0);
+  if(r==='cart'){var tp=document.getElementById('tossPay');if(tp&&(ST.form.method||'toss')==='toss')mountToss(Number(tp.dataset.amount||0))}
   document.getElementById('acctSlot').innerHTML=ST.acct?'<a href="#mypage" class="who">'+esc(ST.acct.name)+'님</a> <button class="linkbtn" data-act="logout">로그아웃</button>':'<a href="#login">로그인</a>';
   var s=ST.settings||{};
   var biz=[];if(s.bizName)biz.push('상호 '+s.bizName);if(s.ceo)biz.push('대표 '+s.ceo);if(s.bizNo)biz.push('사업자등록번호 '+s.bizNo);if(s.mailOrder)biz.push('통신판매업 '+s.mailOrder);

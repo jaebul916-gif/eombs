@@ -3,7 +3,7 @@
 var ST={db:null,write:null,acct:null,admin:false,products:null,notices:null,settings:{},
   myDoc:null,myFulfil:null,myWallet:null,allOrders:null,allFulfil:{},allWallet:{},accounts:null,
   cart:[],form:{pay:'bank',name:'',phone:'',dep:'',addr:'',agree:false,pts:0},route:'home',err:'',cat:'all',sort:'pop',
-  atab:'orders',afilter:'all',busy:false,pending:false,ltab:'in',lerr:'',ready:false,next:'',pendingAdd:null,loginMsg:'',inq:null,replies:{},adminInq:null,ofilter:'all',sel:null,gi:0,ierr:'',dtab:'info',only:'',modal:null,reviews:[],pqa:[],qrep:{},pedit:'',pdraft:null,pnew:false,pdelc:'',upmsg:'',presetQty:0,likes:[],paywin:null};
+  atab:'orders',afilter:'all',busy:false,pending:false,ltab:'in',lerr:'',ready:false,next:'',pendingAdd:null,loginMsg:'',inq:null,replies:{},adminInq:null,ofilter:'all',sel:null,gi:0,ierr:'',dtab:'info',only:'',modal:null,reviews:[],pqa:[],qrep:{},pedit:'',pdraft:null,pnew:false,pdelc:'',upmsg:'',presetQty:0,likes:[],paywin:null,toss:null,tossErr:'',tossNotice:''};
 var subs=[];
 try{var c=JSON.parse(localStorage.getItem('sp-cart')||'[]');if(Array.isArray(c))ST.cart=c.filter(function(x){return x&&x.pid}).map(function(x){return x.lid?x:{lid:newLid(),pid:x.pid,qty:x.qty||1,opts:{},inputs:x.note?{f1:x.note}:{}}})}catch(e){}
 function saveCart(){try{localStorage.setItem('sp-cart',JSON.stringify(ST.cart))}catch(e){}}

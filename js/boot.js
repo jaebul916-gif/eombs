@@ -26,5 +26,6 @@ async function boot(){
   else{try{sid=localStorage.getItem('sp-sess')}catch(e){}}
   if(sid){try{var a=await db.doc('accounts/'+sid).get();if(a.exists)setAcct(sid,a.data());else setAcct(null)}catch(e){}}
   ST.ready=true;route();
+  try{tossReturn()}catch(e){}
 }
 boot();

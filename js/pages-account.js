@@ -14,7 +14,7 @@ function orderCard(o){
   var refs=o.items.map(function(i){return '<li>'+esc(i.name)+' × '+i.qty+itemDetail(i)+'</li>'}).join('');
   var hay=(o.no+' '+o.items.map(function(i){return i.name+' '+((i.refs||[]).join(' '))}).join(' ')).toLowerCase();
   return '<article class="card ord" data-hay="'+esc(hay)+'"><div class="ord-head"><div><strong class="num">'+esc(o.no)+'</strong> <span class="muted small">'+dt(o.createdAt)+'</span></div>'+(o.cancelRequested&&o.status!=='canceled'?'<span class="chip warn">취소 요청됨</span>':chip(o.status))+'</div>'
-   +'<ul>'+refs+'</ul><div class="row" style="justify-content:space-between"><span class="small muted">'+(o.pay==='points'?'포인트 결제':'무통장입금'+(o.depositor?' · '+esc(o.depositor):'')+(o.pts?' · 포인트 '+won(o.pts)+' 사용':''))+'</span><strong class="num">'+won(o.total)+'</strong></div>'
+   +'<ul>'+refs+'</ul><div class="row" style="justify-content:space-between"><span class="small muted">'+(o.pay==='points'?'포인트 결제':o.pay==='card'?'토스페이먼츠(테스트 결제)'+(o.pts?' · 포인트 '+won(o.pts)+' 사용':''):'무통장입금'+(o.depositor?' · '+esc(o.depositor):'')+(o.pts?' · 포인트 '+won(o.pts)+' 사용':''))+'</span><strong class="num">'+won(o.total)+'</strong></div>'
    +(o.status==='pending'&&o.pay==='bank'?'<p class="small reply">입금 안내 · '+bankText()+'<br><span class="muted">입금자명 '+esc(o.depositor||'')+' · 입금액 '+won(o.total-(o.pts||0))+'</span></p>':'')
    +(o.memo?'<p class="small"><span class="muted">관리자 메모</span> '+esc(o.memo)+'</p>':'')
    +((o.status==='pending'||o.status==='paid')&&!o.cancelRequested?'<div><button class="btn danger sm" data-act="cancel-req" data-id="'+esc(o.id)+'">취소 요청</button></div>':'')+'</article>';
@@ -29,6 +29,7 @@ function pageMy(){
     return '<article class="card ord"><div class="ord-head"><strong>'+esc(q.title)+'</strong>'+(r?'<span class="chip ok">답변 완료</span>':'<span class="chip warn">답변 대기</span>')+'</div><p class="small muted num">'+dt(q.at)+'</p><p style="white-space:pre-wrap">'+esc(q.body)+'</p>'
      +(r?'<div class="reply"><div class="small muted">관리자 답변 · '+dt(r.at)+'</div><p style="white-space:pre-wrap">'+esc(r.text)+'</p></div>':'')+'</article>'}).join('');
   return '<h1 class="ph">'+esc(ST.acct.name)+'님. <span>주문 내역을 확인하세요.</span></h1>'
+   +(ST.tossNotice?'<p class="banner" style="border-radius:12px;margin-bottom:.8rem">'+esc(ST.tossNotice)+'</p>':'')
    +'<div class="card balance"><div><div class="small muted">적립금 잔액</div><strong class="num">'+won(bal)+'</strong></div><a class="btn ghost" href="#services">적립금 충전</a></div>'
    +(log?'<details class="card" style="margin-top:.8rem"><summary>적립금 내역</summary><ul style="list-style:none;padding:0;margin:.6rem 0 0">'+log+'</ul></details>':'')
    +'<section><div class="sechead"><h2>주문 내역.</h2><label style="min-width:13rem"><input id="ordFilter" type="search" placeholder="주문번호 검색" aria-label="주문번호 검색"></label></div>'
