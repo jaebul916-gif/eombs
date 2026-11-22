@@ -210,7 +210,7 @@ details .body{margin-top:.6rem;white-space:pre-wrap;color:var(--muted)}
 .totalbar{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:.8rem}
 .totalbar b{font-size:1.6rem}
 .detail{margin-top:1.5rem;display:grid;gap:1.2rem}
-.detail .blk img{width:100%;border-radius:14px;display:block}
+.detail .blk img{width:100%;border-radius:24px;display:block;box-shadow:0 10px 34px rgba(0,0,0,.10)}
 .stars{color:var(--warn)}
 .mback{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:30}
 .mbox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:31;background:var(--tile);border-radius:22px;padding:1.6rem;width:min(92vw,24rem);display:grid;gap:1.1rem;box-shadow:0 10px 40px rgba(0,0,0,.35)}

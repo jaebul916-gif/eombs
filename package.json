@@ -1,0 +1,11 @@
+{
+  "name": "eombs",
+  "private": true,
+  "type": "module",
+  "description": "엄배송 - 쇼피·큐텐 배송대행 웹앱 포트폴리오",
+  "scripts": {
+    "build": "node build.mjs",
+    "seed": "node tools/gen-seed.mjs",
+    "og": "node tools/make-og.mjs"
+  }
+}

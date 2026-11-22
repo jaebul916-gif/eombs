@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+{{HEAD}}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="{{BASE}}css/style.css">
+<link rel="stylesheet" href="{{BASE}}css/static.css">
+</head>
+<body>
+
+<div class="navband"><div class="navin gut wrap">
+  <a class="brand" href="#home">엄배송</a>
+  <nav class="links" aria-label="주요 메뉴">
+    <a href="#home" data-r="home">홈</a>
+    <a href="#services" data-r="services">서비스</a>
+    <a href="#notices" data-r="notices">공지</a>
+    <a href="#mypage" data-r="mypage" id="myLink" hidden>마이페이지</a>
+    <a href="#manage" data-r="manage" id="adminLink" hidden>관리자</a>
+  </nav>
+  <div class="right"><span id="acctSlot"></span><a class="cartlink" href="#cart" aria-label="장바구니">장바구니<b id="cartCount">0</b></a></div>
+</div></div>
+<div class="gut"><main class="wrap" id="app">{{PRERENDER}}</main></div>
+<footer class="foot"><div class="gut"><div class="wrap" id="foot"></div></div></footer>
+<div class="toast" id="toast" hidden></div>
+<div id="modalSlot"></div>
+
+<script src="{{BASE}}js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="{{BASE}}js/util.js"></script>
+<script src="{{BASE}}js/constants.js"></script>
+<script src="{{BASE}}js/state.js"></script>
+<script src="{{BASE}}js/product-art.js"></script>
+<script src="{{BASE}}js/supabase.js"></script>
+<script src="{{BASE}}js/cart-helpers.js"></script>
+<script src="{{BASE}}js/pages-shop.js"></script>
+<script src="{{BASE}}js/pages-account.js"></script>
+<script src="{{BASE}}js/admin.js"></script>
+<script src="{{BASE}}js/render.js"></script>
+<script src="{{BASE}}js/auth.js"></script>
+<script src="{{BASE}}js/orders.js"></script>
+<script src="{{BASE}}js/events.js"></script>
+<script src="{{BASE}}js/boot.js"></script>
+</body>
+</html>

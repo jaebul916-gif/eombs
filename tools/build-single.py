@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""index.html + css/ + js/ 를 파일 하나로 합칩니다. (Claude 아티팩트처럼 단일 파일이 필요할 때 사용)
+"""src/app.html + css/ + js/ 를 파일 하나로 합칩니다. (Claude 아티팩트처럼 단일 파일이 필요할 때 사용)
 사용법: python3 tools/build-single.py [출력파일]   기본값: dist/single.html"""
 import re, sys, os
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-html = open(os.path.join(root, 'index.html'), encoding='utf-8').read()
+html = open(os.path.join(root, 'src', 'app.html'), encoding='utf-8').read()
+html = html.replace('{{HEAD}}', '<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n<title>엄배송</title>').replace('{{PRERENDER}}', '').replace('{{BASE}}', '')
 def css(m):
     return '<style>\n' + open(os.path.join(root, m.group(1)), encoding='utf-8').read() + '</style>'
-html = re.sub(r'<link rel="stylesheet" href="(css/[^"]+)">', css, html)
+html = re.sub(r'<link rel="stylesheet" href="(css/[^"]+)">\n?', css, html)
 # 로컬 js 는 하나의 IIFE 로 합칩니다 (외부 CDN 스크립트는 그대로 둠)
 parts = []
 def grab(m):

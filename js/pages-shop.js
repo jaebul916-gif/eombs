@@ -15,8 +15,8 @@ function pageHome(){
   var ns=(ST.notices||[]).slice(0,3).map(function(n){return '<li class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-block:.8rem"><a href="#notices">'+esc(n.title)+'</a><span class="num small muted">'+esc((n.at||'').slice(0,10))+'</span></li>'}).join('');
   var routes=['ICN → SGP','ICN → KUL','ICN → MNL','ICN → BKK','ICN → SGN','ICN → TPE','ICN → NRT','ICN → CGK'];
   var mq=routes.concat(routes).map(function(r){return '<span>'+r+'</span>'}).join('');
-  return '<section class="hero"><div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div><h1 class="big"><span class="grad">엄배송.</span> <span>배송등록,<br>이렇게 간단하게.</span></h1>'
-   +'<p class="lead">쇼피와 큐텐 주문번호만 적어 보내세요. 배송등록과 합배송 접수'+(low?'는 건당 '+won(low)+'부터':'')+' 시작합니다.</p>'
+  return '<section class="hero"><div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div><h1 class="big"><span class="grad">엄배송.</span> <span>쇼피·큐텐 배송등록,<br>이렇게 간단하게.</span></h1>'
+   +'<p class="lead">쇼피 배대지, 큐텐 배대지, 해외배송대행을 한곳에서. 주문번호만 적어 보내세요. 배송등록과 합배송 접수'+(low?'는 건당 '+won(low)+'부터':'')+' 시작합니다.</p>'
    +'<div class="row"><a class="btn" href="#services" data-auth="1">배송등록 신청하기</a><a class="btn ghost" href="#mypage" data-auth="1">주문 조회</a></div></section>'
    +'<div class="marquee" aria-hidden="true"><div class="mq-track">'+mq+'</div></div>'
    +'<section class="feats"><article><b class="num">'+(low?won(low):'1,900원')+'~</b><h3>건당 합리적인 요금</h3><p>쇼피·큐텐 배송등록을 건당 요금으로 접수합니다.</p></article>'
@@ -27,6 +27,9 @@ function pageHome(){
    +'<div class="label-route">ICN → SGP</div><div class="small muted">EB20261121-4821</div><div class="barcode"></div>'
    +'<dl><dt>PCS</dt><dd>1</dd><dt>WEIGHT</dt><dd>480 g</dd><dt>MARKET</dt><dd>SHOPEE SG</dd></dl><div class="label-foot">예시 라벨 · 실제 송장이 아닙니다</div></div></section>'
    +'<section><div class="sechead"><h2>인기 서비스.</h2><a class="lnk" href="#services">전체 보기</a></div><div class="tiles">'+feat.map(tile).join('')+'</div></section>'
+   +'<section class="seohome"><article><h2>쇼피 배대지</h2><p class="muted">쇼피 주문번호를 입력하면 한 건씩 배송등록을 접수하고, 같은 구매자의 여러 주문은 합배송으로 묶어 접수합니다.</p><a class="lnk" href="shopee/">쇼피 배대지 안내 보기</a></article>'
+   +'<article><h2>큐텐 배대지</h2><p class="muted">큐텐(KSE) 주문번호를 입력해 배송등록을 접수합니다. 합배송도 같은 방식으로 신청할 수 있습니다.</p><a class="lnk" href="qoo10/">큐텐 배대지 안내 보기</a></article>'
+   +'<article><h2>해외배송대행 요금</h2><p class="muted">배송등록 '+(low?won(low)+'부터, ':'')+'합배송과 옵션별 추가 요금까지 한눈에 비교할 수 있습니다.</p><a class="lnk" href="pricing/">요금표 보기</a></article></section>'
    +'<section><div class="sechead"><h2>이용 방법.</h2></div><ol class="steps">'
    +'<li><h3>마켓에서 판매</h3><p class="muted small">쇼피나 큐텐에서 주문이 들어오면 주문번호를 복사해 둡니다.</p></li>'
    +'<li><h3>서비스 담고 신청</h3><p class="muted small">배송등록을 담고 주문번호를 한 줄에 하나씩 붙여 넣습니다.</p></li>'
