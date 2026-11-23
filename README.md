@@ -3,7 +3,8 @@
 쇼피·큐텐 배송대행(배대지) 웹앱 포트폴리오입니다. 정적 파일만으로 동작하고, 데이터는 Supabase를 씁니다.
 실제 서비스가 아니라 **제작 포트폴리오용 데모**이며, 화면의 요금·결제는 실제와 무관합니다.
 
-- 배포 주소: https://jaebul916-gif.github.io/eombs/ (GitHub Pages, `main` 브랜치 루트)
+- 배포 주소: https://eombs.jaebul916.workers.dev/ (Cloudflare Workers 정적 배포, `main` 푸시 시 자동 빌드·배포)
+  - 예전 GitHub Pages 주소(https://jaebul916-gif.github.io/eombs/)는 `/eombs/` 하위 경로라 링크·CSS 경로가 어긋나므로 더 이상 기준 주소로 쓰지 않습니다.
 
 ## 제공 기능
 
@@ -32,14 +33,14 @@
 ## 빌드
 
 ```bash
-node build.mjs                      # https://jaebul916-gif.github.io/eombs/ 기준
+node build.mjs                      # https://eombs.jaebul916.workers.dev/ 기준
 SITE_URL=https://example.com/ node build.mjs   # 다른 주소 기준
 ```
 
 생성되는 것: 페이지별 고유 `<title>`, `description`, Open Graph, `canonical`, JSON-LD(Organization, WebSite, Service, OfferCatalog, FAQPage, BreadcrumbList), `robots.txt`, `sitemap.xml`.
 요금표는 `js/constants.js` 의 기본 상품에서 읽어 오므로 상품을 바꾼 뒤에는 `node build.mjs` 를 다시 실행하세요. 결과 파일은 커밋합니다.
 
-참고: 프로젝트 페이지(`github.io/eombs/`)에서는 `robots.txt` 가 도메인 루트가 아니어서 검색봇이 읽지 않을 수 있습니다. 그래서 `index,follow` 메타와 `sitemap.xml`(Search Console 에 직접 제출)로 보완합니다. 커스텀 도메인을 쓰면 `SITE_URL` 만 바꿔서 다시 빌드하세요.
+참고: 루트(`/`)로 배포되므로 `robots.txt`·`sitemap.xml` 이 도메인 루트에서 바로 읽힙니다. 주소를 바꾸면 `SITE_URL` 만 바꿔서 다시 빌드하세요(하위 경로 주소면 `BASE` 가 그 경로로 계산됩니다).
 
 ## 결제 (토스페이먼츠 테스트 결제)
 

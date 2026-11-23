@@ -1,7 +1,8 @@
 /* 토스페이먼츠 결제위젯(주문서형) v2 — 테스트 결제 연동 */
 "use strict";
 var TOSS_KEY=(window.TOSS_CFG&&window.TOSS_CFG.clientKey)||'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
-var TOSS_BASE='https://jaebul916-gif.github.io/eombs/';
+/* 결제 후 돌아올 주소: 지금 열려 있는 주소 기준(루트 배포면 /, 하위 경로 배포면 그 경로) */
+var TOSS_BASE=location.origin+((location.pathname.indexOf('/eombs/')===0)?'/eombs/':'/');
 
 function tossCustomerKey(){
   var k='';try{k=localStorage.getItem('sp-tck')||''}catch(e){}

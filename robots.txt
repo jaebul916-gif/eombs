@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://jaebul916-gif.github.io/eombs/sitemap.xml
+Sitemap: https://eombs.jaebul916.workers.dev/sitemap.xml

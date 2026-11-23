@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 엄배송 정적 사이트 빌드
- *   node build.mjs                     → https://jaebul916-gif.github.io/eombs/ 기준으로 생성
+ *   node build.mjs                     → https://eombs.jaebul916.workers.dev/ 기준으로 생성
  *   SITE_URL=https://example.com/ node build.mjs   → 다른 주소 기준으로 생성
  *
  * 생성물: index.html, shopee/, qoo10/, pricing/, faq/, 404.html, robots.txt, sitemap.xml
@@ -14,8 +14,8 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
-const SITE_URL = (process.env.SITE_URL || 'https://jaebul916-gif.github.io/eombs/').replace(/\/?$/, '/');
-const BASE = new URL(SITE_URL).pathname;            // 예: /eombs/
+const SITE_URL = (process.env.SITE_URL || 'https://eombs.jaebul916.workers.dev/').replace(/\/?$/, '/');
+const BASE = new URL(SITE_URL).pathname;            // 루트 배포면 / , 하위 경로면 /eombs/
 const NAME = '엄배송';
 const TODAY = process.env.BUILD_DATE || new Date().toISOString().slice(0, 10);
 const OG_IMAGE = SITE_URL + 'images/og.png';
